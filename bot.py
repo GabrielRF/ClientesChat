@@ -31,7 +31,10 @@ def add_user_db(user_id):
 def add_user_thread(user_id, thread_id):
     return db.users.update_one(
         {'user_id': user_id},
-        {'$set': {'thread_id': thread_id}},
+        {'$set': {
+            'thread_id': thread_id,
+            'channel_thread': thread_id,
+        }},
     )
 
 def is_team_member(user_id):
@@ -52,6 +55,11 @@ def add_message(user_id, private_id, group_id, message):
 def on_pin(message):
     bot.delete_message(sac_channel, message.message_id)
 
+@bot.message_handler(commands=['fim'])
+def unpin(message):
+    bot.unpin_chat_message(sac_channel, message.json['reply_to_message']['forward_from_message_id'])
+    
+
 @bot.message_handler(func=lambda m:True)
 def on_message(message):
     #print(message)
@@ -69,10 +77,15 @@ def on_message(message):
             add_user_thread(message.from_user.id, msg.message_id)
         else:
             if message.reply_to_message:
-                reply_id = search_message('private_id', message.reply_to_message.message_id)['group_id']
+                user = search_message('private_id', message.reply_to_message.message_id)['group_id']
+                reply_id = user['group_id']
+                channel_thread = user['channel_thread']
             else:
-                reply_id = search_user(message.from_user.id)['thread_id']
+                user = search_user(message.from_user.id)
+                reply_id = user['thread_id']
+                channel_thread = user['channel_thread']
             msg = bot.send_message(sac_group, message.text, reply_to_message_id=reply_id)
+            bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
         add_message(message.from_user.id, message.message_id, msg.message_id, message)
     if message.from_user.id > 777000 and is_team_member(message.from_user.id):
         if search_thread(message.reply_to_message.message_id):
