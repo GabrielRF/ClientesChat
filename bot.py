@@ -77,15 +77,15 @@ def on_message(message):
             add_user_thread(message.from_user.id, msg.message_id)
         else:
             if message.reply_to_message:
-                user = search_message('private_id', message.reply_to_message.message_id)['group_id']
+                user = search_message('private_id', message.reply_to_message.message_id)
                 reply_id = user['group_id']
-                channel_thread = user['channel_thread']
             else:
                 user = search_user(message.from_user.id)
+                print(user)
                 reply_id = user['thread_id']
                 channel_thread = user['channel_thread']
+                bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
             msg = bot.send_message(sac_group, message.text, reply_to_message_id=reply_id)
-            bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
         add_message(message.from_user.id, message.message_id, msg.message_id, message)
     if message.from_user.id > 777000 and is_team_member(message.from_user.id):
         if search_thread(message.reply_to_message.message_id):
