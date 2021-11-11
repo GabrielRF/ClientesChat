@@ -38,7 +38,7 @@ def add_user_thread(user_id, thread_id):
     )
 
 def is_team_member(user_id):
-    if bot.get_chat_member(sac_group, user_id).status == 'left':
+    if bot.get_chat_member(sac_channel, user_id).status == 'left':
         return False
     return True
 
@@ -59,7 +59,6 @@ def on_pin(message):
 def unpin(message):
     bot.unpin_chat_message(sac_channel, message.json['reply_to_message']['forward_from_message_id'])
     
-
 @bot.message_handler(func=lambda m:True)
 def on_message(message):
     #print(message)
@@ -81,7 +80,6 @@ def on_message(message):
                 reply_id = user['group_id']
             else:
                 user = search_user(message.from_user.id)
-                print(user)
                 reply_id = user['thread_id']
                 channel_thread = user['channel_thread']
                 bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
@@ -106,10 +104,10 @@ def on_edit(message):
         chat_id = search_message('group_id', message.message_id)
         bot.edit_message_text(message.text, chat_id['user_id'], chat_id['private_id'])
 
-@bot.chat_member_handler(func=lambda m:True)
-def on_chat_action(message):
-    if message.new_chat_member.status == 'member':
-        bot.ban_chat_member(message.chat.id, message.new_chat_member.user.id)
-        bot.unban_chat_member(message.chat.id, message.new_chat_member.user.id)
+#@bot.chat_member_handler(func=lambda m:True)
+#def on_chat_action(message):
+    #if message.new_chat_member.status == 'member':
+        #bot.ban_chat_member(message.chat.id, message.new_chat_member.user.id)
+        #bot.unban_chat_member(message.chat.id, message.new_chat_member.user.id)
 
 bot.polling(allowed_updates=telebot.util.update_types)
