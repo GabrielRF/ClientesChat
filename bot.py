@@ -8,6 +8,20 @@ bot = telebot.TeleBot('2118150557:AAF50aifvDepZVednI4ksyvKb2hqWhVg2EQ')
 sac_channel = -1001688033043
 sac_group = -1001339156805
 
+bot.set_my_commands([
+    telebot.types.BotCommand("/start", "Novo atendimento"),
+    telebot.types.BotCommand("/tos", "Termos do serviço"),
+], telebot.types.BotCommandScope('all_private_chats'))
+
+bot.set_my_commands([
+    telebot.types.BotCommand("/p", "Definir proridade"),
+    telebot.types.BotCommand("/fim", "Encerrar um atendimento")
+], telebot.types.BotCommandScope('all_group_chats'))
+
+TOS = ('''
+Termos de serviço 
+''')
+
 def search_user(user_id):
     return db.users.find_one({"user_id": user_id})
 
@@ -84,10 +98,11 @@ def documents(message):
         else:
             user = search_message('group_id', channel_thread)
             msg = bot.copy_message(user['user_id'], sac_group, message.message_id)
+        add_message(user['user_id'], msg.message_id, message.message_id, msg)
     else:
         user = search_user(message.from_user.id)
-        bot.copy_message(sac_group, message.from_user.id, message.message_id, reply_to_message_id=user['thread_id'])
-
+        msg = bot.copy_message(sac_group, message.from_user.id, message.message_id, reply_to_message_id=user['thread_id'])
+        add_message(message.from_user.id, message.message_id, msg.message_id, message)
 
 @bot.message_handler(content_types=['pinned_message'])
 @bot.channel_post_handler(content_types=['pinned_message'])
@@ -100,7 +115,10 @@ def unpin(message):
     user_id = message.reply_to_message.json['entities'][0]['user']['id']
     try:
         update_user_info(user_id, 'priority', int(0))
-        update_thread(user_id)
+        try:
+            update_thread(user_id)
+        except:
+            pass
         bot.reply_to(message, 'Atendimento encerrado.')
         bot.send_message(user_id, 'Atendimento encerrado. Envie /start para um novo atendimento.')
     except:
@@ -110,16 +128,19 @@ def unpin(message):
 @bot.message_handler(commands=['p'])
 def set_priority(message):
     if is_team_member(message.from_user.id):
-        if message.text != '/p':
+        if len(message.text.split(' ')) > 1:
             channel_thread = message.json['reply_to_message']['message_id']
             user = search_thread(channel_thread)
-            priority = message.text.replace('/p ', '')
+            priority = message.text.split()[-1]
             update_user_info(user['user_id'], 'priority', int(priority))
             msg = update_thread(user['user_id'])
             bot.delete_message(message.chat.id, message.message_id)
         else:
             bot.reply_to(message, 'Envie <code>/p valor</code> para definir a prioridade.', parse_mode='HTML')
 
+@bot.message_handler(commands=['tos'])
+def tos(message):
+    bot.reply_to(message, TOS, parse_mode='HTML')
     
 @bot.message_handler(func=lambda m:True)
 def on_message(message):
