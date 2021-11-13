@@ -1,5 +1,6 @@
 import telebot
-from telebot import types,util
+import msgs
+from telebot import types, util
 from pymongo import ASCENDING, MongoClient
 
 client = MongoClient()
@@ -17,10 +18,6 @@ bot.set_my_commands([
     telebot.types.BotCommand("/p", "Definir proridade"),
     telebot.types.BotCommand("/fim", "Encerrar um atendimento")
 ], telebot.types.BotCommandScope('all_group_chats'))
-
-TOS = ('''
-Termos de serviço 
-''')
 
 def search_user(user_id):
     return db.users.find_one({"user_id": user_id})
@@ -50,7 +47,9 @@ def get_priority(value):
 
 def update_thread(user_id):
     data = search_user(user_id)
-    msg = f'{get_priority(data["priority"])} <a href="tg://user?id={data["user_id"]}">{data["user_id"]}</a> 👤 {data["name"]}'
+    msg = msgs.topic_format.format(get_priority(data["priority"]), data["user_id"], data["name"], '')
+    #msgs.topic_format.format(get_priority(1), message.from_user.id, message.from_user.first_name, message.from_user.last_name)
+
     return bot.edit_message_text(chat_id=sac_channel, message_id=data['channel_thread'], text=msg, parse_mode='HTML')
 
 def add_user_db(message):
@@ -119,10 +118,11 @@ def unpin(message):
             update_thread(user_id)
         except:
             pass
-        bot.reply_to(message, 'Atendimento encerrado.')
-        bot.send_message(user_id, 'Atendimento encerrado. Envie /start para um novo atendimento.')
+        bot.send_message(sac_group, msgs.end_operator.format(message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+        bot.send_message(user_id, msgs.end_user)
     except:
-        bot.delete_message(message.chat.id, message.message_id)
+        pass
+    bot.delete_message(message.chat.id, message.message_id)
 
 
 @bot.message_handler(commands=['p'])
@@ -132,16 +132,27 @@ def set_priority(message):
             channel_thread = message.json['reply_to_message']['message_id']
             user = search_thread(channel_thread)
             priority = message.text.split()[-1]
-            update_user_info(user['user_id'], 'priority', int(priority))
-            msg = update_thread(user['user_id'])
-            bot.delete_message(message.chat.id, message.message_id)
-        else:
-            bot.reply_to(message, 'Envie <code>/p valor</code> para definir a prioridade.', parse_mode='HTML')
+            try:
+                if 1 <= int(priority) <= 5:
+                    try:
+                        update_user_info(user['user_id'], 'priority', int(priority))
+                        msg = update_thread(user['user_id'])
+                    except:
+                        pass
+                    bot.delete_message(message.chat.id, message.message_id)
+                    return
+            except ValueError:
+                pass
+        bot.reply_to(message, msgs.set_priority, parse_mode='HTML')
 
 @bot.message_handler(commands=['tos'])
 def tos(message):
-    bot.reply_to(message, TOS, parse_mode='HTML')
-    
+    bot.reply_to(message, msgs.tos, parse_mode='HTML')
+
+@bot.message_handler(commands=['start'])
+def cmd_start(message):
+    bot.reply_to(message, msgs.start.format(message.from_user.first_name), parse_mode='HTML')
+
 @bot.message_handler(func=lambda m:True)
 def on_message(message):
     if message.from_user.id == 777000 and '👤' in message.text and '🟦' in message.text:
@@ -153,8 +164,7 @@ def on_message(message):
         user = search_user(message.from_user.id)
         if not user:
             add_user_db(message)
-            msg = bot.send_message(sac_channel,
-                f'{get_priority(1)} <a href="tg://user?id={message.from_user.id}">{message.from_user.id}</a> 👤 {message.from_user.first_name} {message.from_user.last_name}', parse_mode='HTML')
+            msg = bot.send_message(sac_channel, msgs.topic_format.format(get_priority(1), message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML')
             add_user_thread(message.from_user.id, msg.message_id)
         else:
             if message.reply_to_message:
@@ -182,7 +192,7 @@ def on_message(message):
                 msg = bot.send_message(reply_id['user_id'], message.text, reply_to_message_id=reply_id['private_id'])
             add_message(reply_id['user_id'], msg.message_id, message.message_id, msg)
         except AttributeError:
-            bot.reply_to(message, 'Utilize os comentários do canal para responder as pessoas.')
+            bot.reply_to(message, msgs.error_operator)
 
 
 @bot.edited_message_handler(func=lambda m:True)
@@ -190,11 +200,13 @@ def on_edit(message):
     if message.from_user.id == 777000:
         return
     if not is_team_member(message.from_user.id):
-        group_id = search_message('private_id', message.json['message_id'])['group_id']
-        bot.edit_message_text(message.text, sac_group, group_id)
+        data = search_message('private_id', message.json['message_id'])
+        bot.edit_message_text(message.text, sac_group, data['group_id'])
+        add_message(message.from_user.id, data['private_id'], 'edit', message)
     else:
         chat_id = search_message('group_id', message.message_id)
         bot.edit_message_text(message.text, chat_id['user_id'], chat_id['private_id'])
+        add_message(chat_id['user_id'], chat_id['private_id'], 'edit', message)
 
 @bot.chat_member_handler(func=lambda m:True)
 def on_chat_action(message):
