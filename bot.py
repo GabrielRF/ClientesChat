@@ -12,11 +12,13 @@ sac_group = -1001339156805
 bot.set_my_commands([
     telebot.types.BotCommand("/start", "Novo atendimento"),
     telebot.types.BotCommand("/tos", "Termos do serviço"),
+    telebot.types.BotCommand("/ajuda", "Ajuda"),
 ], telebot.types.BotCommandScope('all_private_chats'))
 
 bot.set_my_commands([
     telebot.types.BotCommand("/p", "Definir proridade"),
-    telebot.types.BotCommand("/fim", "Encerrar um atendimento")
+    telebot.types.BotCommand("/fim", "Encerrar um atendimento"),
+    telebot.types.BotCommand("/ajuda", "Ajuda"),
 ], telebot.types.BotCommandScope('all_group_chats'))
 
 def search_user(user_id):
@@ -108,8 +110,17 @@ def documents(message):
 def on_pin(message):
     bot.delete_message(sac_channel, message.message_id)
 
+@bot.message_handler(commands=['ajuda', 'help'])
+def help(message):
+    if is_team_member(message.from_user.id):
+        bot.reply_to(message, msgs.help_operator, parse_mode='HTML')
+    else:
+        bot.reply_to(message, msgs.help_user, parse_mode='HTML')
+
 @bot.message_handler(commands=['fim'])
 def unpin(message):
+    if not is_team_member(message.from_user.id):
+        return
     bot.unpin_chat_message(sac_channel, message.json['reply_to_message']['forward_from_message_id'])
     user_id = message.reply_to_message.json['entities'][0]['user']['id']
     try:
@@ -119,7 +130,7 @@ def unpin(message):
         except:
             pass
         bot.send_message(sac_group, msgs.end_operator.format(message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
-        bot.send_message(user_id, msgs.end_user)
+        bot.send_message(user_id, msgs.end_user, parse_mode='HTML')
     except:
         pass
     bot.delete_message(message.chat.id, message.message_id)
@@ -175,11 +186,14 @@ def on_message(message):
                 reply_id = user['thread_id']
                 channel_thread = user['channel_thread']
                 bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
-                try:
+            try:
+                if user['priority'] == 0:
                     update_user_info(user['user_id'], 'priority', int(1))
-                    update_thread(user['user_id'])
-                except:
-                    pass
+                else:
+                    update_user_info(user['user_id'], 'priority', user['priority'])
+                update_thread(user['user_id'])
+            except:
+                pass
             msg = bot.send_message(sac_group, message.text, reply_to_message_id=reply_id)
         add_message(message.from_user.id, message.message_id, msg.message_id, message)
     if message.from_user.id > 777000 and is_team_member(message.from_user.id):
@@ -210,6 +224,8 @@ def on_edit(message):
 
 @bot.chat_member_handler(func=lambda m:True)
 def on_chat_action(message):
+    if message.chat.id == sac_channel:
+        return
     if message.new_chat_member.status == 'member':
         bot.ban_chat_member(message.chat.id, message.new_chat_member.user.id)
         bot.unban_chat_member(message.chat.id, message.new_chat_member.user.id)
