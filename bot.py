@@ -19,6 +19,7 @@ bot.set_my_commands([
     telebot.types.BotCommand("/p", "Definir proridade"),
     telebot.types.BotCommand("/fim", "Encerrar um atendimento"),
     telebot.types.BotCommand("/ajuda", "Ajuda"),
+    telebot.types.BotCommand("/ban", "Banir usuário"),
 ], telebot.types.BotCommandScope('all_group_chats'))
 
 def search_user(user_id):
@@ -38,6 +39,7 @@ def convert_thread(channel_thread, group_thread):
 
 def get_priority(value):
     cases = {
+        -1: '❌',
         0: '⬜️',
         1: '🟦',
         2: '🟩',
@@ -124,7 +126,7 @@ def unpin(message):
     bot.unpin_chat_message(sac_channel, message.json['reply_to_message']['forward_from_message_id'])
     user_id = message.reply_to_message.json['entities'][0]['user']['id']
     try:
-        update_user_info(user_id, 'priority', int(0))
+        update_user_info(user_id, 'priority', 0)
         try:
             update_thread(user_id)
         except:
@@ -135,6 +137,22 @@ def unpin(message):
         pass
     bot.delete_message(message.chat.id, message.message_id)
 
+@bot.message_handler(commands=['ban'])
+def ban(message):
+    if not is_team_member(message.from_user.id):
+        return
+    bot.unpin_chat_message(sac_channel, message.json['reply_to_message']['forward_from_message_id'])
+    user_id = message.reply_to_message.json['entities'][0]['user']['id']
+    try:
+        update_user_info(user_id, 'priority', -1)
+        try:
+            update_thread(user_id)
+        except:
+            pass
+        bot.send_message(sac_group, msgs.ban_operator.format(message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+    except:
+        pass
+    bot.delete_message(message.chat.id, message.message_id)
 
 @bot.message_handler(commands=['p'])
 def set_priority(message):
@@ -185,12 +203,15 @@ def on_message(message):
                 user = search_user(message.from_user.id)
                 reply_id = user['thread_id']
                 channel_thread = user['channel_thread']
-                bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
             try:
-                if user['priority'] == 0:
-                    update_user_info(user['user_id'], 'priority', int(1))
+                if user['priority'] == -1:
+                    update_user_info(user['user_id'], 'priority', -1)
                 else:
-                    update_user_info(user['user_id'], 'priority', user['priority'])
+                    if user['priority'] == 0:
+                        update_user_info(user['user_id'], 'priority', 1)
+                    else:
+                        update_user_info(user['user_id'], 'priority', user['priority'])
+                    bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
                 update_thread(user['user_id'])
             except:
                 pass
