@@ -29,4 +29,4 @@ help_operator = ('⚙️ <b>Ajuda</b>'
     '\n<code>/p número</code> para alterar a <b>prioridade</b>.'
     '\n<code>/fim</code> para <b>encerrar</b> o chamado.'
     '\n<code>/ban</code> para banir a pessoa.'
-    '\nAlterar a prioridade automaticamente <b>desbane</b> a pessoa.')
+    '\nAlterar prioridade ou finalizar automaticamente <b>desbane</b> a pessoa.')
