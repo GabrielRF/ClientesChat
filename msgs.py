@@ -1,6 +1,8 @@
 tos = ('<b>Termos de serviço</b>'
     '\n'
     '\n- Todas as mensagens são registradas, mesmo as editadas e as apagadas.')
+start_operator = ('Você faz parte do time de resposta.'
+    '\nEnvie as mensagens no canal para responder os usuários.')
 start = ('Olá, <b>{}</b>!'
     '\nPor favor, envie seu relato de forma objetiva e resumida.'
     '\nSe necessário, inclua prints de tela.'
@@ -30,3 +32,4 @@ help_operator = ('⚙️ <b>Ajuda</b>'
     '\n<code>/fim</code> para <b>encerrar</b> o chamado.'
     '\n<code>/ban</code> para banir a pessoa.'
     '\nAlterar prioridade ou finalizar automaticamente <b>desbane</b> a pessoa.')
+bot_banned = ('❌ O bot foi bloqueado pelo usuário ❌')

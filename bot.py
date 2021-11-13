@@ -53,18 +53,24 @@ def update_thread(user_id):
     data = search_user(user_id)
     msg = msgs.topic_format.format(get_priority(data["priority"]), data["user_id"], data["name"], '')
     #msgs.topic_format.format(get_priority(1), message.from_user.id, message.from_user.first_name, message.from_user.last_name)
-
-    return bot.edit_message_text(chat_id=sac_channel, message_id=data['channel_thread'], text=msg, parse_mode='HTML')
+    try:
+        bot.edit_message_text(chat_id=sac_channel, message_id=data['channel_thread'], text=msg, parse_mode='HTML')
+    except:
+        pass
 
 def add_user_db(message):
     return db.users.insert_one({
         'user_id': message.from_user.id,
-        'name': f'{message.from_user.first_name} {message.from_user.last_name}',
+        'name': f'{message.from_user.first_name} {message.from_user.last_name}'.replace('None', ''),
         'priority': 1,
     })
 
 def update_user_info(user_id, key, arg):
-     return db.users.update_one(
+    try:
+        arg = arg.replace('None', '')
+    except AttributeError:
+        pass
+    return db.users.update_one(
         {'user_id': user_id},
         {'$set': {key: arg}},
     )
@@ -91,7 +97,7 @@ def add_message(user_id, private_id, group_id, message):
         'message': str(message),
     })
 
-@bot.message_handler(content_types=['document', 'audio', 'photo', 'animation', 'voice_note', 'audio', 'sticker'])
+@bot.message_handler(content_types=['document', 'audio', 'photo', 'animation', 'video_note', 'voice', 'sticker', 'video', 'contact'])
 def documents(message):
     if is_team_member(message.from_user.id):
         channel_thread = message.json['reply_to_message']['message_id']
@@ -106,6 +112,18 @@ def documents(message):
         user = search_user(message.from_user.id)
         msg = bot.copy_message(sac_group, message.from_user.id, message.message_id, reply_to_message_id=user['thread_id'])
         add_message(message.from_user.id, message.message_id, msg.message_id, message)
+        if user['priority'] == -1:
+            update_user_info(user['user_id'], 'priority', -1)
+        else:
+            if user['priority'] == 0:
+                update_user_info(user['user_id'], 'priority', 1)
+            else:
+                update_user_info(user['user_id'], 'priority', user['priority'])
+            bot.pin_chat_message(sac_channel, user['channel_thread'], disable_notification=True)
+            try:
+                update_thread(user['user_id'])
+            except:
+                pass
 
 @bot.message_handler(content_types=['pinned_message'])
 @bot.channel_post_handler(content_types=['pinned_message'])
@@ -115,7 +133,7 @@ def on_pin(message):
 @bot.message_handler(commands=['ajuda', 'help'])
 def help(message):
     if is_team_member(message.from_user.id):
-        bot.reply_to(message, msgs.help_operator, parse_mode='HTML')
+        bot.send_message(sac_group, msgs.help_operator, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
     else:
         bot.reply_to(message, msgs.help_user, parse_mode='HTML')
 
@@ -131,7 +149,7 @@ def unpin(message):
             update_thread(user_id)
         except:
             pass
-        bot.send_message(sac_group, msgs.end_operator.format(message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+        bot.send_message(sac_group, msgs.end_operator.format(message.from_user.id, message.from_user.first_name, message.from_user.last_name).replace('None', ''), parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
         bot.send_message(user_id, msgs.end_user, parse_mode='HTML')
     except:
         pass
@@ -157,9 +175,9 @@ def ban(message):
 @bot.message_handler(commands=['p'])
 def set_priority(message):
     if is_team_member(message.from_user.id):
+        channel_thread = message.json['reply_to_message']['message_id']
+        user = search_thread(channel_thread)
         if len(message.text.split(' ')) > 1:
-            channel_thread = message.json['reply_to_message']['message_id']
-            user = search_thread(channel_thread)
             priority = message.text.split()[-1]
             try:
                 if 1 <= int(priority) <= 5:
@@ -172,7 +190,7 @@ def set_priority(message):
                     return
             except ValueError:
                 pass
-        bot.reply_to(message, msgs.set_priority, parse_mode='HTML')
+        bot.send_message(sac_group, msgs.set_priority, parse_mode='HTML', disable_notification=True, reply_to_message_id=message.reply_to_message.message_id)
 
 @bot.message_handler(commands=['tos'])
 def tos(message):
@@ -180,7 +198,10 @@ def tos(message):
 
 @bot.message_handler(commands=['start'])
 def cmd_start(message):
-    bot.reply_to(message, msgs.start.format(message.from_user.first_name), parse_mode='HTML')
+    if is_team_member(message.from_user.id) == 'left':
+        bot.reply_to(message, msgs.start.format(message.from_user.first_name), parse_mode='HTML')
+    else:
+        bot.send_message(message.from_user.id, msgs.start_operator, parse_mode='HTML')
 
 @bot.message_handler(func=lambda m:True)
 def on_message(message):
@@ -191,9 +212,11 @@ def on_message(message):
         bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
     if message.from_user.id > 777000 and not is_team_member(message.from_user.id):
         user = search_user(message.from_user.id)
+        update_user_info(user['user_id'], 'name', f'{message.from_user.first_name} {message.from_user.last_name}')
+        update_thread(user['user_id'])
         if not user:
             add_user_db(message)
-            msg = bot.send_message(sac_channel, msgs.topic_format.format(get_priority(1), message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML')
+            msg = bot.send_message(sac_channel, msgs.topic_format.format(get_priority(1), message.from_user.id, message.from_user.first_name, message.from_user.last_name.replace), parse_mode='HTML')
             add_user_thread(message.from_user.id, msg.message_id)
         else:
             if message.reply_to_message:
@@ -228,7 +251,14 @@ def on_message(message):
             add_message(reply_id['user_id'], msg.message_id, message.message_id, msg)
         except AttributeError:
             bot.reply_to(message, msgs.error_operator)
-
+        except:
+            bot.reply_to(message, msgs.bot_banned)
+            bot.unpin_chat_message(sac_channel, message.json['reply_to_message']['forward_from_message_id'])
+            update_user_info(reply_id['user_id'], 'priority', -1)
+            try:
+                update_thread(reply_id['user_id'])
+            except:
+                pass
 
 @bot.edited_message_handler(func=lambda m:True)
 def on_edit(message):
