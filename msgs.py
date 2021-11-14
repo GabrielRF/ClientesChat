@@ -33,3 +33,8 @@ help_operator = ('⚙️ <b>Ajuda</b>'
     '\n<code>/ban</code> para banir a pessoa.'
     '\nAlterar prioridade ou finalizar automaticamente <b>desbane</b> a pessoa.')
 bot_banned = ('❌ O bot foi bloqueado pelo usuário ❌')
+quick_answer_ask = ('Envie uma resposta pronta. Para cancelar, envie /cancelar')
+quick_answer_del = ('Envie a resposta pronta a ser removida.')
+quick_answer_saved = ('Resposta pronta salva.')
+quick_answer_deleted = ('Resposta pronta removida.')
+quick_answer_error = ('Resposta pronta não localizada.')

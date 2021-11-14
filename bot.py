@@ -20,6 +20,8 @@ bot.set_my_commands([
     telebot.types.BotCommand("/fim", "Encerrar um atendimento"),
     telebot.types.BotCommand("/ajuda", "Ajuda"),
     telebot.types.BotCommand("/ban", "Banir usuário"),
+    telebot.types.BotCommand("/resposta", "Definir uma resposta pronta"),
+    telebot.types.BotCommand("/remover", "Remover uma resposta pronta"),
 ], telebot.types.BotCommandScope('all_group_chats'))
 
 def search_user(user_id):
@@ -52,7 +54,6 @@ def get_priority(value):
 def update_thread(user_id):
     data = search_user(user_id)
     msg = msgs.topic_format.format(get_priority(data["priority"]), data["user_id"], data["name"], '')
-    #msgs.topic_format.format(get_priority(1), message.from_user.id, message.from_user.first_name, message.from_user.last_name)
     try:
         bot.edit_message_text(chat_id=sac_channel, message_id=data['channel_thread'], text=msg, parse_mode='HTML')
     except:
@@ -90,6 +91,28 @@ def is_team_member(user_id):
     if bot.get_chat_member(sac_channel, user_id).status == 'left':
         return False
     return True
+
+def add_quick_answer(message):
+    return db.answers.insert_one({
+        'message': str(message),
+    })
+
+def del_quick_answer(message):
+    result = db.answers.delete_one({
+        'message': str(message),
+    })
+    return result.deleted_count
+
+def inc_quick_answer(message):
+    return db.metrics.update_one(
+        {"message": message},
+        {"$inc": {"usage": 1}},
+        upsert=True,
+    )
+
+def find_quick_answer():
+    return db.answers.find().sort('usage', ASCENDING)
+
 
 def add_message(user_id, private_id, group_id, message):
     return db.msgs.insert_one({
@@ -211,6 +234,35 @@ def cmd_start(message):
     else:
         bot.send_message(message.from_user.id, msgs.start_operator, parse_mode='HTML')
 
+def quick_answer_save(message):
+    if is_team_member(message.from_user.id):
+        if '/cancelar' in message.text:
+            msg = bot.send_message(sac_group, msgs.quick_answer_error, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+            return
+        add_quick_answer(message.text)
+        msg = bot.send_message(sac_group, msgs.quick_answer_saved, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+
+@bot.message_handler(commands=['resposta'])
+def quick_answer(message):
+    if is_team_member(message.from_user.id):
+        msg = bot.send_message(sac_group, msgs.quick_answer_ask, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+        bot.register_next_step_handler(msg, quick_answer_save)
+
+def quick_answer_deleted(message):
+    if is_team_member(message.from_user.id):
+        answer = message.text
+        answer = del_quick_answer(answer)
+        if int(answer):
+            msg = bot.send_message(sac_group, msgs.quick_answer_deleted, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+        else:
+            msg = bot.send_message(sac_group, msgs.quick_answer_error, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+
+@bot.message_handler(commands=['remover'])
+def quick_answer_del(message):
+    if is_team_member(message.from_user.id):
+        msg = bot.send_message(sac_group, msgs.quick_answer_del, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+        bot.register_next_step_handler(msg, quick_answer_deleted)
+
 @bot.message_handler(func=lambda m:True)
 def on_message(message):
     if message.from_user.id == 777000 and '👤' in message.text and '⬜️' in message.text:
@@ -237,20 +289,20 @@ def on_message(message):
         except:
             pass
         try:
-            msg = bot.send_message(sac_group, message.text, reply_to_message_id=reply_id)
+            msg = bot.send_message(sac_group, message.text, reply_to_message_id=reply_id, parse_mode='HTML')
         except:
             user = search_message('private_id', message.reply_to_message.message_id)
             reply_id = user['group_id']
-            msg = bot.send_message(sac_group, message.text, reply_to_message_id=reply_id)
+            msg = bot.send_message(sac_group, message.text, reply_to_message_id=reply_id, parse_mode='HTML')
         add_message(message.from_user.id, message.message_id, msg.message_id, message)
     if message.from_user.id > 777000 and is_team_member(message.from_user.id):
         try:
             if search_thread(message.reply_to_message.message_id):
                 reply_id = search_thread(message.reply_to_message.message_id)
-                msg = bot.send_message(reply_id['user_id'], message.text)
+                msg = bot.send_message(reply_id['user_id'], message.text, parse_mode='HTML')
             else:
                 reply_id = search_message('group_id', message.reply_to_message.message_id)
-                msg = bot.send_message(reply_id['user_id'], message.text, reply_to_message_id=reply_id['private_id'])
+                msg = bot.send_message(reply_id['user_id'], message.text, reply_to_message_id=reply_id['private_id'], parse_mode='HTML')
             add_message(reply_id['user_id'], msg.message_id, message.message_id, msg)
         except AttributeError:
             bot.reply_to(message, msgs.error_operator)
@@ -283,5 +335,16 @@ def on_chat_action(message):
     if message.new_chat_member.status == 'member':
         bot.ban_chat_member(message.chat.id, message.new_chat_member.user.id)
         bot.unban_chat_member(message.chat.id, message.new_chat_member.user.id)
+
+@bot.inline_handler(func=lambda m: True)
+def query_text(query):
+    if not is_team_member(query.from_user.id):
+        return
+    else:
+        answers = find_quick_answer()
+        query_result = []
+        for answer in answers[:25]:
+            query_result.append(types.InlineQueryResultArticle(answer['message'], answer['message'], types.InputTextMessageContent(answer['message'])))
+        bot.answer_inline_query(query.id, query_result, cache_time=5)
 
 bot.polling(allowed_updates=telebot.util.update_types)
