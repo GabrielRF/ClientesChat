@@ -158,7 +158,10 @@ def on_pin(message):
 @bot.message_handler(commands=['ajuda', 'help'])
 def help(message):
     if is_team_member(message.from_user.id):
-        bot.send_message(sac_group, msgs.help_operator, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+        try:
+            bot.send_message(sac_group, msgs.help_operator, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+        except:
+            bot.reply_to(message, msgs.help_user, parse_mode='HTML')
     else:
         bot.reply_to(message, msgs.help_user, parse_mode='HTML')
 
@@ -343,8 +346,8 @@ def query_text(query):
     else:
         answers = find_quick_answer()
         query_result = []
-        for answer in answers[:25]:
-            query_result.append(types.InlineQueryResultArticle(answer['message'], answer['message'], types.InputTextMessageContent(answer['message'])))
-        bot.answer_inline_query(query.id, query_result, cache_time=5)
+        for i, answer in enumerate(answers[:25]):
+            query_result.append(types.InlineQueryResultArticle(i, answer['message'], types.InputTextMessageContent(answer['message'])))
+        bot.answer_inline_query(query.id, query_result, cache_time=0)
 
 bot.polling(allowed_updates=telebot.util.update_types)
