@@ -59,9 +59,11 @@ def update_thread(user_id):
         pass
 
 def add_user_db(message):
+    first_name = str(message.from_user.first_name).replace('None', '')
+    last_name = str(message.from_user.last_name).replace('None', '')
     return db.users.insert_one({
         'user_id': message.from_user.id,
-        'name': f'{message.from_user.first_name} {message.from_user.last_name}'.replace('None', ''),
+        'name': f'{first_name} {last_name}',
         'priority': 1,
     })
 
@@ -149,7 +151,7 @@ def unpin(message):
             update_thread(user_id)
         except:
             pass
-        bot.send_message(sac_group, msgs.end_operator.format(message.from_user.id, message.from_user.first_name, message.from_user.last_name).replace('None', ''), parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+        bot.send_message(sac_group, msgs.end_operator.format(message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
         bot.send_message(user_id, msgs.end_user, parse_mode='HTML')
     except:
         pass
@@ -198,46 +200,47 @@ def tos(message):
 
 @bot.message_handler(commands=['start'])
 def cmd_start(message):
-    if is_team_member(message.from_user.id) == 'left':
+    if not is_team_member(message.from_user.id):
+        user = search_user(message.from_user.id)
+        if not user:
+            add_user_db(message)
+            msg = bot.send_message(sac_channel, msgs.topic_format.format(get_priority(0), message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML')
+            add_user_thread(message.from_user.id, msg.message_id)
+            user = search_user(message.from_user.id)
         bot.reply_to(message, msgs.start.format(message.from_user.first_name), parse_mode='HTML')
     else:
         bot.send_message(message.from_user.id, msgs.start_operator, parse_mode='HTML')
 
 @bot.message_handler(func=lambda m:True)
 def on_message(message):
-    if message.from_user.id == 777000 and '👤' in message.text and '🟦' in message.text:
+    if message.from_user.id == 777000 and '👤' in message.text and '⬜️' in message.text:
         channel_thread = search_thread(message.forward_from_message_id)['thread_id']
         group_thread = message.message_id
         convert_thread(channel_thread, group_thread)
-        bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
     if message.from_user.id > 777000 and not is_team_member(message.from_user.id):
         user = search_user(message.from_user.id)
         update_user_info(user['user_id'], 'name', f'{message.from_user.first_name} {message.from_user.last_name}')
         update_thread(user['user_id'])
-        if not user:
-            add_user_db(message)
-            msg = bot.send_message(sac_channel, msgs.topic_format.format(get_priority(1), message.from_user.id, message.from_user.first_name, message.from_user.last_name.replace), parse_mode='HTML')
-            add_user_thread(message.from_user.id, msg.message_id)
-        else:
-            if message.reply_to_message:
-                user = search_message('private_id', message.reply_to_message.message_id)
-                reply_id = user['group_id']
+        user = search_user(message.from_user.id)
+        reply_id = user['thread_id']
+        channel_thread = user['channel_thread']
+        try:
+            if user['priority'] == -1:
+                update_user_info(user['user_id'], 'priority', -1)
             else:
-                user = search_user(message.from_user.id)
-                reply_id = user['thread_id']
-                channel_thread = user['channel_thread']
-            try:
-                if user['priority'] == -1:
-                    update_user_info(user['user_id'], 'priority', -1)
+                if user['priority'] == 0:
+                    update_user_info(user['user_id'], 'priority', 1)
                 else:
-                    if user['priority'] == 0:
-                        update_user_info(user['user_id'], 'priority', 1)
-                    else:
-                        update_user_info(user['user_id'], 'priority', user['priority'])
-                    bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
-                update_thread(user['user_id'])
-            except:
-                pass
+                    update_user_info(user['user_id'], 'priority', user['priority'])
+                bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
+            update_thread(user['user_id'])
+        except:
+            pass
+        try:
+            msg = bot.send_message(sac_group, message.text, reply_to_message_id=reply_id)
+        except:
+            user = search_message('private_id', message.reply_to_message.message_id)
+            reply_id = user['group_id']
             msg = bot.send_message(sac_group, message.text, reply_to_message_id=reply_id)
         add_message(message.from_user.id, message.message_id, msg.message_id, message)
     if message.from_user.id > 777000 and is_team_member(message.from_user.id):

@@ -22,7 +22,7 @@ end_user = ('🔲 <b>Atendimento encerrado.</b>'
     '\nEnvie /start para começar um novo atendimento.')
 ban_operator = ('⚙️ Usuário banido por <a href="tg://user?id={0}">{0} {1} {2}</a>.')
 topic_format = (
-    '{0} <a href="tg://user?id={1}">{1} 👤 {2} {3}</a>')
+    '{0} <a href="tg://user?id={1}">{1}</a> 👤 {2} {3}')
 error_operator = ('⚙️ Utilize os comentários do canal para responder as pessoas.')
 help_user = ('<b>Ajuda</b>'
     '\nTodas as mensagens enviadas aqui serão enviadas para atendimento.'
