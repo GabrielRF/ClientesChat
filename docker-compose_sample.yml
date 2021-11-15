@@ -1,0 +1,20 @@
+mongo:
+    image: mongo
+    restart: always
+    ports:
+        - 47017:27017
+    environment:
+        - AUTH=no
+
+sac_robot:
+    build: .
+    environment:
+        - TOKEN=
+        - SAC_CHANNEL=
+        - SAC_GROUP=
+        - BOT_USERNAME=
+        - MONGO_SERVER=
+        - MONGO_PORT=
+    restart: always
+    links:
+        - mongo
