@@ -1,14 +1,19 @@
 import telebot
 import msgs
+import os
 from telebot import types, util
 from pymongo import ASCENDING, MongoClient
 
-client = MongoClient()
+TOKEN = os.getenv('TOKEN')
+sac_channel = os.getenv('SAC_CHANNEL')
+sac_group = os.getenv('SAC_GROUP')
+sac_bot = os.getenv('BOT_USERNAME')
+MONGO_SERVER = os.getenv('MONGO_SERVER')
+MONGO_PORT = os.getenv('MONGO_PORT')
+
+client = MongoClient(f"mongodb://{MONGO_SERVER}:{MONGO_PORT}/")
 db = client.sac
-bot = telebot.TeleBot('2118150557:AAF50aifvDepZVednI4ksyvKb2hqWhVg2EQ')
-sac_channel = -1001688033043
-sac_group = -1001339156805
-sac_bot = 'SAC_Robot'
+bot = telebot.TeleBot(TOKEN)
 
 bot.set_my_commands([
     telebot.types.BotCommand("/start", "Novo atendimento"),
@@ -301,13 +306,17 @@ def on_message(message):
         group_thread = message.message_id
         convert_thread(channel_thread, group_thread)
     if message.from_user.id > 777000 and not is_team_member(message.from_user.id):
-        user = search_user(message.from_user.id)
-        update_user_info(user['user_id'], 'name', f'{message.from_user.first_name} {message.from_user.last_name}')
-        update_thread(user['user_id'])
-        user = search_user(message.from_user.id)
-        reply_id = user['thread_id']
-        channel_thread = user['channel_thread']
         try:
+            user = search_message('private_id', message.reply_to_message.message_id)
+            reply_id = user['group_id']
+            msg = bot.send_message(sac_group, message.text, reply_to_message_id=reply_id, parse_mode='HTML')
+        except:
+            user = search_user(message.from_user.id)
+            update_user_info(user['user_id'], 'name', f'{message.from_user.first_name} {message.from_user.last_name}')
+            update_thread(user['user_id'])
+            user = search_user(message.from_user.id)
+            reply_id = user['thread_id']
+            channel_thread = user['channel_thread']
             if user['priority'] == -1:
                 update_user_info(user['user_id'], 'priority', -1)
             else:
@@ -317,13 +326,6 @@ def on_message(message):
                     update_user_info(user['user_id'], 'priority', user['priority'])
                 bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
             update_thread(user['user_id'])
-        except:
-            pass
-        try:
-            msg = bot.send_message(sac_group, message.text, reply_to_message_id=reply_id, parse_mode='HTML')
-        except:
-            user = search_message('private_id', message.reply_to_message.message_id)
-            reply_id = user['group_id']
             msg = bot.send_message(sac_group, message.text, reply_to_message_id=reply_id, parse_mode='HTML')
         add_message(message.from_user.id, message.message_id, msg.message_id, message)
     if message.from_user.id > 777000 and is_team_member(message.from_user.id):
