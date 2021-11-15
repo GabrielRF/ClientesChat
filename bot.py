@@ -8,6 +8,7 @@ db = client.sac
 bot = telebot.TeleBot('2118150557:AAF50aifvDepZVednI4ksyvKb2hqWhVg2EQ')
 sac_channel = -1001688033043
 sac_group = -1001339156805
+sac_bot = 'SAC_Robot'
 
 bot.set_my_commands([
     telebot.types.BotCommand("/start", "Novo atendimento"),
@@ -110,8 +111,11 @@ def inc_quick_answer(message):
         upsert=True,
     )
 
-def find_quick_answer():
-    return db.answers.find().sort('usage', ASCENDING)
+def find_quick_answer(text=None):
+    if text:
+        return db.answers.find({'message': {'$regex': text}})
+    else:
+        return db.answers.find()
 
 
 def add_message(user_id, private_id, group_id, message):
@@ -240,15 +244,25 @@ def cmd_start(message):
 def quick_answer_save(message):
     if is_team_member(message.from_user.id):
         if '/cancelar' in message.text:
-            msg = bot.send_message(sac_group, msgs.quick_answer_error, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+            try:
+                msg = bot.send_message(sac_group, msgs.quick_answer_error, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+            except:
+                msg = bot.send_message(message.chat.id, msgs.quick_answer_error, parse_mode='HTML')
             return
         add_quick_answer(message.text)
-        msg = bot.send_message(sac_group, msgs.quick_answer_saved, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+        try:
+            msg = bot.send_message(sac_group, msgs.quick_answer_saved, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+        except:
+            msg = bot.send_message(message.chat.id, msgs.quick_answer_saved, parse_mode='HTML')
+
 
 @bot.message_handler(commands=['resposta'])
 def quick_answer(message):
     if is_team_member(message.from_user.id):
-        msg = bot.send_message(sac_group, msgs.quick_answer_ask, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+        try:
+            msg = bot.send_message(sac_group, msgs.quick_answer_ask, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+        except:
+            msg = bot.send_message(message.chat.id, msgs.quick_answer_ask, parse_mode='HTML')
         bot.register_next_step_handler(msg, quick_answer_save)
 
 def quick_answer_deleted(message):
@@ -342,9 +356,10 @@ def on_chat_action(message):
 @bot.inline_handler(func=lambda m: True)
 def query_text(query):
     if not is_team_member(query.from_user.id):
-        return
+        query_result = types.InlineQueryResultArticle(0, f'@{sac_bot}', types.InputTextMessageContent(msgs.inline_user_link.format(sac_bot)))
+        bot.answer_inline_query(query.id, [query_result], is_personal=True, switch_pm_text=msgs.inline_user_header, switch_pm_parameter='start')
     else:
-        answers = find_quick_answer()
+        answers = find_quick_answer(query.query)
         query_result = []
         for i, answer in enumerate(answers[:25]):
             query_result.append(types.InlineQueryResultArticle(i, answer['message'], types.InputTextMessageContent(answer['message'])))
