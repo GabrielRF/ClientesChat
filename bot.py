@@ -20,9 +20,9 @@ bot.set_my_commands([
     telebot.types.BotCommand("/p", "Definir proridade"),
     telebot.types.BotCommand("/fim", "Encerrar um atendimento"),
     telebot.types.BotCommand("/ajuda", "Ajuda"),
-    telebot.types.BotCommand("/ban", "Banir usuário"),
     telebot.types.BotCommand("/resposta", "Definir uma resposta pronta"),
     telebot.types.BotCommand("/remover", "Remover uma resposta pronta"),
+    telebot.types.BotCommand("/ban", "Banir usuário"),
 ], telebot.types.BotCommandScope('all_group_chats'))
 
 def search_user(user_id):
@@ -113,7 +113,7 @@ def inc_quick_answer(message):
 
 def find_quick_answer(text=None):
     if text:
-        return db.answers.find({'message': {'$regex': text}})
+        return db.answers.find({'message': {'$regex': f'(?i){text}'}})
     else:
         return db.answers.find()
 
@@ -128,6 +128,7 @@ def add_message(user_id, private_id, group_id, message):
 
 @bot.message_handler(content_types=['document', 'audio', 'photo', 'animation', 'video_note', 'voice', 'sticker', 'video', 'contact'])
 def documents(message):
+    bot.send_chat_action(message.chat.id, 'typing')
     if is_team_member(message.from_user.id):
         channel_thread = message.json['reply_to_message']['message_id']
         user = search_thread(channel_thread)
@@ -161,6 +162,7 @@ def on_pin(message):
 
 @bot.message_handler(commands=['ajuda', 'help'])
 def help(message):
+    bot.send_chat_action(message.chat.id, 'typing')
     if is_team_member(message.from_user.id):
         try:
             bot.send_message(sac_group, msgs.help_operator, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
@@ -171,6 +173,7 @@ def help(message):
 
 @bot.message_handler(commands=['fim'])
 def unpin(message):
+    bot.send_chat_action(message.chat.id, 'typing')
     if not is_team_member(message.from_user.id):
         return
     bot.unpin_chat_message(sac_channel, message.json['reply_to_message']['forward_from_message_id'])
@@ -189,6 +192,7 @@ def unpin(message):
 
 @bot.message_handler(commands=['ban'])
 def ban(message):
+    bot.send_chat_action(message.chat.id, 'typing')
     if not is_team_member(message.from_user.id):
         return
     bot.unpin_chat_message(sac_channel, message.json['reply_to_message']['forward_from_message_id'])
@@ -206,6 +210,7 @@ def ban(message):
 
 @bot.message_handler(commands=['p'])
 def set_priority(message):
+    bot.send_chat_action(message.chat.id, 'typing')
     if is_team_member(message.from_user.id):
         channel_thread = message.json['reply_to_message']['message_id']
         user = search_thread(channel_thread)
@@ -226,10 +231,12 @@ def set_priority(message):
 
 @bot.message_handler(commands=['tos'])
 def tos(message):
+    bot.send_chat_action(message.chat.id, 'typing')
     bot.reply_to(message, msgs.tos, parse_mode='HTML')
 
 @bot.message_handler(commands=['start'])
 def cmd_start(message):
+    bot.send_chat_action(message.chat.id, 'typing')
     if not is_team_member(message.from_user.id):
         user = search_user(message.from_user.id)
         if not user:
@@ -242,6 +249,7 @@ def cmd_start(message):
         bot.send_message(message.from_user.id, msgs.start_operator, parse_mode='HTML')
 
 def quick_answer_save(message):
+    bot.send_chat_action(message.chat.id, 'typing')
     if is_team_member(message.from_user.id):
         if '/cancelar' in message.text:
             try:
@@ -258,6 +266,7 @@ def quick_answer_save(message):
 
 @bot.message_handler(commands=['resposta'])
 def quick_answer(message):
+    bot.send_chat_action(message.chat.id, 'typing')
     if is_team_member(message.from_user.id):
         try:
             msg = bot.send_message(sac_group, msgs.quick_answer_ask, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
@@ -266,6 +275,7 @@ def quick_answer(message):
         bot.register_next_step_handler(msg, quick_answer_save)
 
 def quick_answer_deleted(message):
+    bot.send_chat_action(message.chat.id, 'typing')
     if is_team_member(message.from_user.id):
         answer = message.text
         answer = del_quick_answer(answer)
@@ -276,12 +286,16 @@ def quick_answer_deleted(message):
 
 @bot.message_handler(commands=['remover'])
 def quick_answer_del(message):
+    bot.send_chat_action(message.chat.id, 'typing')
     if is_team_member(message.from_user.id):
         msg = bot.send_message(sac_group, msgs.quick_answer_del, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
         bot.register_next_step_handler(msg, quick_answer_deleted)
 
 @bot.message_handler(func=lambda m:True)
 def on_message(message):
+    bot.send_chat_action(message.chat.id, 'typing')
+    if message.chat.id == sac_group:
+        return
     if message.from_user.id == 777000 and '👤' in message.text and '⬜️' in message.text:
         channel_thread = search_thread(message.forward_from_message_id)['thread_id']
         group_thread = message.message_id
@@ -334,6 +348,9 @@ def on_message(message):
 
 @bot.edited_message_handler(func=lambda m:True)
 def on_edit(message):
+    bot.send_chat_action(message.chat.id, 'typing')
+    if message.chat.id == sac_group:
+        return
     if message.from_user.id == 777000:
         return
     if not is_team_member(message.from_user.id):
@@ -363,6 +380,6 @@ def query_text(query):
         query_result = []
         for i, answer in enumerate(answers[:25]):
             query_result.append(types.InlineQueryResultArticle(i, answer['message'], types.InputTextMessageContent(answer['message'])))
-        bot.answer_inline_query(query.id, query_result, cache_time=0)
+        bot.answer_inline_query(query.id, query_result, cache_time=120)
 
 bot.polling(allowed_updates=telebot.util.update_types)
