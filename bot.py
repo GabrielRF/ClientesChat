@@ -12,7 +12,7 @@ MONGO_SERVER = os.getenv('MONGO_SERVER')
 MONGO_PORT = os.getenv('MONGO_PORT')
 
 client = MongoClient(f"mongodb://{MONGO_SERVER}:{MONGO_PORT}/")
-db = client.sac
+db = client[sac_bot]
 bot = telebot.TeleBot(TOKEN)
 
 bot.set_my_commands([
