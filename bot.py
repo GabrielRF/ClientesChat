@@ -366,7 +366,7 @@ def on_edit(message):
 
 @bot.chat_member_handler(func=lambda m:True)
 def on_chat_action(message):
-    if message.chat.id == sac_channel:
+    if message.chat.type == 'channel':
         return
     if message.new_chat_member.status == 'member':
         bot.ban_chat_member(message.chat.id, message.new_chat_member.user.id)
