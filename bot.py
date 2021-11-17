@@ -224,8 +224,6 @@ def set_priority(message):
             try:
                 if 1 <= int(priority) <= 5:
                     try:
-                        if user['priority'] < 1:
-                            bot.send_message(sac_group, msgs.restart, parse_mode='HTML', reply_to_message_id=user['thread_id'])
                         update_user_info(user['user_id'], 'priority', int(priority))
                         msg = update_thread(user['user_id'])
                     except:
@@ -301,8 +299,6 @@ def quick_answer_del(message):
 @bot.message_handler(func=lambda m:True)
 def on_message(message):
     bot.send_chat_action(message.chat.id, 'typing')
-    if message.chat.id == sac_group:
-        return
     if message.from_user.id == 777000 and '👤' in message.text and '⬜️' in message.text:
         channel_thread = search_thread(message.forward_from_message_id)['thread_id']
         group_thread = message.message_id
@@ -324,6 +320,7 @@ def on_message(message):
             else:
                 if user['priority'] == 0:
                     update_user_info(user['user_id'], 'priority', 1)
+                    bot.send_message(user['user_id'], msgs.restart, parse_mode='HTML')
                 else:
                     update_user_info(user['user_id'], 'priority', user['priority'])
                 bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
