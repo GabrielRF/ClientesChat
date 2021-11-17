@@ -1,3 +1,4 @@
+import datetime
 import telebot
 import msgs
 import os
@@ -129,6 +130,7 @@ def add_message(user_id, private_id, group_id, message):
         'private_id': private_id,
         'group_id': group_id,
         'message': str(message),
+        'date': datetime.datetime.now()
     })
 
 @bot.message_handler(content_types=['document', 'audio', 'photo', 'animation', 'video_note', 'voice', 'sticker', 'video', 'contact'])
