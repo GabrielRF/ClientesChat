@@ -224,6 +224,8 @@ def set_priority(message):
             try:
                 if 1 <= int(priority) <= 5:
                     try:
+                        if user['priority'] < 1:
+                            bot.send_message(sac_group, msgs.restart, parse_mode='HTML', reply_to_message_id=user['thread_id'])
                         update_user_info(user['user_id'], 'priority', int(priority))
                         msg = update_thread(user['user_id'])
                     except:
