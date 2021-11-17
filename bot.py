@@ -11,6 +11,7 @@ sac_group = os.getenv('SAC_GROUP')
 sac_bot = os.getenv('BOT_USERNAME')
 MONGO_SERVER = os.getenv('MONGO_SERVER')
 MONGO_PORT = os.getenv('MONGO_PORT')
+LOG_DAYS = os.getenv('LOG_DAYS')
 
 client = MongoClient(f"mongodb://{MONGO_SERVER}:{MONGO_PORT}/")
 db = client[sac_bot]
@@ -125,6 +126,7 @@ def find_quick_answer(text=None):
 
 
 def add_message(user_id, private_id, group_id, message):
+    db.msgs.create_index('date', expireAfterSeconds=86400*int(LOG_DAYS))
     return db.msgs.insert_one({
         'user_id': user_id,
         'private_id': private_id,
