@@ -15,6 +15,7 @@ sac_robot:
         - BOT_USERNAME=
         - MONGO_SERVER=
         - MONGO_PORT=
+        - LOG_DAYS=
     restart: always
     links:
         - mongo
