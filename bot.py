@@ -329,14 +329,19 @@ def on_message(message):
             if user['priority'] == -1:
                 update_user_info(user['user_id'], 'priority', -1)
             else:
-                if user['priority'] == 0:
-                    update_user_info(user['user_id'], 'priority', 1)
-                    bot.send_message(user['user_id'], RESTART_MSG.replace('<br>', '\n'), parse_mode='HTML')
-                else:
-                    update_user_info(user['user_id'], 'priority', user['priority'])
-                bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
-            update_thread(user['user_id'])
-            msg = bot.copy_message(sac_group, message.from_user.id, message.message_id, reply_to_message_id=reply_id)
+                try:
+                    if user['priority'] == 0:
+                        update_user_info(user['user_id'], 'priority', 1)
+                        bot.send_message(user['user_id'], RESTART_MSG.replace('<br>', '\n'), parse_mode='HTML')
+                    else:
+                        update_user_info(user['user_id'], 'priority', user['priority'])
+                    bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
+                    update_thread(user['user_id'])
+                    msg = bot.copy_message(sac_group, message.from_user.id, message.message_id, reply_to_message_id=reply_id)
+                except:
+                    update_user_info(message.from_user.id, 'user_id', f"-{message.from_user.id}")
+                    cmd_start(message)
+                    return
         add_message(message.from_user.id, message.message_id, msg.message_id, message)
     if message.from_user.id > 777000 and is_team_member(message.from_user.id):
         try:
