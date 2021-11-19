@@ -315,8 +315,12 @@ def on_message(message):
             reply_id = user['group_id']
             msg = bot.send_message(sac_group, message.text, reply_to_message_id=reply_id, parse_mode='HTML')
         except:
-            user = search_user(message.from_user.id)
-            update_user_info(user['user_id'], 'name', f'{message.from_user.first_name} {message.from_user.last_name}')
+            try:
+                user = search_user(message.from_user.id)
+                update_user_info(user['user_id'], 'name', f'{message.from_user.first_name} {message.from_user.last_name}')
+            except:
+                cmd_start(message)
+                return
             update_thread(user['user_id'])
             user = search_user(message.from_user.id)
             reply_id = user['thread_id']
