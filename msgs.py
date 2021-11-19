@@ -3,11 +3,6 @@ tos = ('<b>Termos de serviço</b>'
     '\n- Todas as mensagens são registradas, mesmo as editadas e as apagadas.')
 start_operator = ('Você faz parte do time de resposta.'
     '\nEnvie as mensagens no canal para responder os usuários.')
-start = ('Olá, <b>{}</b>!'
-    '\nPor favor, envie seu relato de forma objetiva e resumida.'
-    '\nSe necessário, inclua prints de tela.'
-    '\nTe responderemos em breve. ✅')
-restart = ('Mensagem enviada. ✅\nTe responderemos em breve.')
 priorities = (
     #'\n⬜️ 0: Encerrado (<code>/fim</code>;'
     '\n🟦 1: Não urgente;'

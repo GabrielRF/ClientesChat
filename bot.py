@@ -12,6 +12,8 @@ sac_bot = os.getenv('BOT_USERNAME')
 MONGO_SERVER = os.getenv('MONGO_SERVER')
 MONGO_PORT = os.getenv('MONGO_PORT')
 LOG_DAYS = os.getenv('LOG_DAYS')
+START_MSG = os.getenv('START_MSG')
+RESTART_MSG = os.getenv('RESTART_MSG')
 
 client = MongoClient(f"mongodb://{MONGO_SERVER}:{MONGO_PORT}/")
 db = client[sac_bot]
@@ -253,7 +255,7 @@ def cmd_start(message):
             msg = bot.send_message(sac_channel, msgs.topic_format.format(get_priority(0), message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML')
             add_user_thread(message.from_user.id, msg.message_id)
             user = search_user(message.from_user.id)
-        bot.reply_to(message, msgs.start.format(message.from_user.first_name), parse_mode='HTML')
+        bot.reply_to(message, START_MSG.format(message.from_user.first_name).replace('<br>', '\n'), parse_mode='HTML')
     else:
         bot.send_message(message.from_user.id, msgs.start_operator, parse_mode='HTML')
 
@@ -324,7 +326,7 @@ def on_message(message):
             else:
                 if user['priority'] == 0:
                     update_user_info(user['user_id'], 'priority', 1)
-                    bot.send_message(user['user_id'], msgs.restart, parse_mode='HTML')
+                    bot.send_message(user['user_id'], RESTART_MSG.replace('<br>', '\n'), parse_mode='HTML')
                 else:
                     update_user_info(user['user_id'], 'priority', user['priority'])
                 bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)

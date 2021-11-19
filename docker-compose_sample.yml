@@ -16,6 +16,8 @@ sac_robot:
         - MONGO_SERVER=
         - MONGO_PORT=
         - LOG_DAYS=
+        - START_MSG=
+        - RESTART_MSG=
     restart: always
     links:
         - mongo
