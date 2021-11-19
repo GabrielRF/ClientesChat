@@ -14,6 +14,7 @@ MONGO_PORT = os.getenv('MONGO_PORT')
 LOG_DAYS = os.getenv('LOG_DAYS')
 START_MSG = os.getenv('START_MSG')
 RESTART_MSG = os.getenv('RESTART_MSG')
+END_MSG = os.getenv('END_MSG')
 
 client = MongoClient(f"mongodb://{MONGO_SERVER}:{MONGO_PORT}/")
 db = client[sac_bot]
@@ -196,7 +197,7 @@ def unpin(message):
         except:
             pass
         bot.send_message(sac_group, msgs.end_operator.format(message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
-        bot.send_message(user_id, msgs.end_user, parse_mode='HTML')
+        bot.send_message(user_id, END_MSG.replace('<br>', '\n'), parse_mode='HTML')
     except:
         pass
     bot.delete_message(message.chat.id, message.message_id)
