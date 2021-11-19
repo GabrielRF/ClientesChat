@@ -314,7 +314,7 @@ def on_message(message):
         try:
             user = search_message('private_id', message.reply_to_message.message_id)
             reply_id = user['group_id']
-            msg = bot.send_message(sac_group, message.text, reply_to_message_id=reply_id, parse_mode='HTML')
+            msg = bot.copy_message(sac_group, message.from_user.id, message.message_id, reply_to_message_id=reply_id)
         except:
             try:
                 user = search_user(message.from_user.id)
@@ -336,16 +336,16 @@ def on_message(message):
                     update_user_info(user['user_id'], 'priority', user['priority'])
                 bot.pin_chat_message(sac_channel, channel_thread, disable_notification=True)
             update_thread(user['user_id'])
-            msg = bot.send_message(sac_group, message.text, reply_to_message_id=reply_id, parse_mode='HTML')
+            msg = bot.copy_message(sac_group, message.from_user.id, message.message_id, reply_to_message_id=reply_id)
         add_message(message.from_user.id, message.message_id, msg.message_id, message)
     if message.from_user.id > 777000 and is_team_member(message.from_user.id):
         try:
             if search_thread(message.reply_to_message.message_id):
                 reply_id = search_thread(message.reply_to_message.message_id)
-                msg = bot.send_message(reply_id['user_id'], message.text, parse_mode='HTML')
+                msg = bot.copy_message(reply_id['user_id'], message.chat.id, message.message_id, reply_to_message_id=reply_id)
             else:
                 reply_id = search_message('group_id', message.reply_to_message.message_id)
-                msg = bot.send_message(reply_id['user_id'], message.text, reply_to_message_id=reply_id['private_id'], parse_mode='HTML')
+                msg = bot.copy_message(reply_id['user_id'], message.chat.id, message.message_id, reply_to_message_id=reply_id['private_id'])
             add_message(reply_id['user_id'], msg.message_id, message.message_id, msg)
         except AttributeError:
             bot.reply_to(message, msgs.error_operator)
