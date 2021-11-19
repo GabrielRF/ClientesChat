@@ -391,7 +391,7 @@ def query_text(query):
         answers = find_quick_answer(query.query)
         query_result = []
         for i, answer in enumerate(answers[:25]):
-            query_result.append(types.InlineQueryResultArticle(i, answer['message'], types.InputTextMessageContent(answer['message'])))
+            query_result.append(types.InlineQueryResultArticle(i, answer['message'], types.InputTextMessageContent(answer['message'], parse_mode='Markdown', disable_web_page_preview=True)))
         bot.answer_inline_query(query.id, query_result, cache_time=120)
 
 bot.polling(allowed_updates=telebot.util.update_types)
