@@ -253,7 +253,7 @@ def cmd_start(message):
         user = search_user(message.from_user.id)
         if not user:
             add_user_db(message)
-            msg = bot.send_message(sac_channel, msgs.topic_format.format(get_priority(0), message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML')
+            msg = bot.send_message(sac_channel, msgs.topic_format.format(get_priority(0), message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML', disable_notification=True)
             add_user_thread(message.from_user.id, msg.message_id)
             user = search_user(message.from_user.id)
         bot.reply_to(message, START_MSG.format(message.from_user.first_name).replace('<br>', '\n'), parse_mode='HTML')
