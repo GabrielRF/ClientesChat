@@ -15,6 +15,7 @@ LOG_DAYS = os.getenv('LOG_DAYS')
 START_MSG = os.getenv('START_MSG')
 RESTART_MSG = os.getenv('RESTART_MSG')
 END_MSG = os.getenv('END_MSG')
+NOTIFY_ADMINS = os.getenv('NOTIFY_ADMINS')
 
 client = MongoClient(f"mongodb://{MONGO_SERVER}:{MONGO_PORT}/")
 db = client[sac_bot]
@@ -170,6 +171,13 @@ def documents(message):
 @bot.message_handler(content_types=['pinned_message'])
 @bot.channel_post_handler(content_types=['pinned_message'])
 def on_pin(message):
+    if int(NOTIFY_ADMINS):
+        url = f"tg:privatepost?channel={sac_channel.replace('-100', '')}&post={message.pinned_message.message_id}"
+        for admin in bot.get_chat_administrators(sac_channel):
+            try:
+                bot.send_message(admin.user.id, msgs.pinned_msg.format(url), parse_mode='HTML')
+            except:
+                pass
     bot.delete_message(sac_channel, message.message_id)
 
 @bot.message_handler(commands=['ajuda', 'help'])
@@ -189,8 +197,8 @@ def unpin(message):
     if not is_team_member(message.from_user.id):
         return
     bot.unpin_chat_message(sac_channel, message.json['reply_to_message']['forward_from_message_id'])
-    user_id = message.reply_to_message.json['entities'][0]['user']['id']
     try:
+        user_id = search_thread(message.reply_to_message.message_id)['user_id']
         update_user_info(user_id, 'priority', 0)
         try:
             update_thread(user_id)
