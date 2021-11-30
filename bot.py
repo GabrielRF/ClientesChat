@@ -172,10 +172,11 @@ def documents(message):
 @bot.channel_post_handler(content_types=['pinned_message'])
 def on_pin(message):
     if int(NOTIFY_ADMINS):
+        name = message.pinned_message.text
         url = f"tg:privatepost?channel={sac_channel.replace('-100', '')}&post={message.pinned_message.message_id}"
         for admin in bot.get_chat_administrators(sac_channel):
             try:
-                bot.send_message(admin.user.id, msgs.pinned_msg.format(url), parse_mode='HTML')
+                bot.send_message(admin.user.id, msgs.pinned_msg.format(url, name), parse_mode='HTML')
             except:
                 pass
     bot.delete_message(sac_channel, message.message_id)
