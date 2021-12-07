@@ -1,6 +1,6 @@
 # [Clientes.Chat](https://clientes.chat)
 
-* [Sobre o serviço](sobre-o-serviço)
+* [Sobre o serviço](sobre_o_serviço)
 * [Configuração](#configuração)
   * [Docker](#docker)
   * [Python](#python)
