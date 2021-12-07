@@ -1,23 +1,37 @@
-mongo:
+version: '3.9'
+services:
+  clienteschat:
+    build: .
+    image: clienteschat
+    environment:
+      TOKEN:
+      SAC_CHANNEL:
+      SAC_GROUP:
+      BOT_USERNAME:
+      MONGO_SERVER: mongodb
+      MONGO_PORT: 27017
+      LOG_DAYS: 14
+      NOTIFY_ADMINS: 1
+      START_MSG:
+      RESTART_MSG:
+      END_MSG:
+    restart: always
+    depends_on:
+      - mongodb
+    deploy:
+      replicas: 1
+    networks:
+      - clienteschat
+
+  mongodb:
     image: mongo
     restart: always
-    ports:
-        - 47017:27017
     environment:
-        - AUTH=no
+      - AUTH=no
+    command:
+      "mongod --oplogSize 128 --quiet"
+    networks:
+      - clienteschat
 
-sac_robot:
-    build: .
-    environment:
-        - TOKEN=
-        - SAC_CHANNEL=
-        - SAC_GROUP=
-        - BOT_USERNAME=
-        - MONGO_SERVER=
-        - MONGO_PORT=
-        - LOG_DAYS=
-        - START_MSG=
-        - RESTART_MSG=
-    restart: always
-    links:
-        - mongo
+networks:
+  clienteschat:
