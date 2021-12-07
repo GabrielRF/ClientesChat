@@ -1,5 +1,13 @@
 # [Clientes.Chat](https://clientes.chat)
 
+* [Sobre o serviço](sobre-o-serviço)
+* [Configuração](#configuração)
+  * [Docker](#docker)
+  * [Python](#python)
+* [Contribuição](#contribuição)
+
+## Sobre o serviço
+
 A maneira mais organizada de atender seus clientes no Telegram!
 
 Para mais informações, [visite o site](https://clientes.chat).
@@ -41,3 +49,7 @@ Clone o repositório, renomeie o arquivo `docker-compose_sample.yml` para `docke
 ### Python
 
 Clone o repositório e edite as variáveis do arquivo `bot.py` conforme a explicação das variáveis de ambiente do docker.
+
+## Contribuição
+
+Toda contribuição é bem vinda! Sem exceção.
