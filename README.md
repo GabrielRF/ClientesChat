@@ -10,7 +10,7 @@
 
 A maneira mais organizada de atender seus clientes no Telegram!
 
-Para mais informações, [visite o site](https://clientes.chat).
+Para mais informações e ajuda, [visite o site](https://clientes.chat).
 
 ## Configuração
 
