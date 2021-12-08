@@ -48,8 +48,22 @@ Clone o repositório, renomeie o arquivo `docker-compose_sample.yml` para `docke
 
 ### Python
 
-Clone o repositório e edite as variáveis do arquivo `bot.py` conforme a explicação das variáveis de ambiente do docker.
+> Para usar este método é necessário ter um banco de dados MongoDB já em funcionamento.
+
+Clone o repositório e edite as variáveis do arquivo `bot.py` conforme a explicação das [variáveis de ambiente usadas em docker](#variáveis-de-ambiente).
+
+Instale as dependências:
+
+```
+pip install -r requirements.txt
+```
+
+Execute o bot:
+
+```
+python bot.py
+```
 
 ## Contribuição
 
-Toda contribuição é bem vinda! Sem exceção.
+**Toda contribuição é bem vinda!**
