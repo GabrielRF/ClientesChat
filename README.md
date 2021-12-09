@@ -46,6 +46,15 @@ Clone o repositório, renomeie o arquivo `docker-compose_sample.yml` para `docke
 
 `docker-compose up -d` para rodar o bot e o banco de dados.
 
+#### Volume
+
+Para definir um volume, acrescente ao `mongodb`:
+
+```
+volumes:
+  - PASTA_NO_HOST:/data/db
+```
+
 ### Python
 
 > Para usar este método é necessário ter um banco de dados MongoDB já em funcionamento.
