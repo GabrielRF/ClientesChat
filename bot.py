@@ -17,7 +17,7 @@ RESTART_MSG = os.getenv('RESTART_MSG')
 END_MSG = os.getenv('END_MSG')
 NOTIFY_ADMINS = os.getenv('NOTIFY_ADMINS')
 
-client = MongoClient(f"mongodb://{MONGO_SERVER}:{MONGO_PORT}/")
+client = MongoClient(f"{MONGO_SERVER}:{MONGO_PORT}/")
 db = client[sac_bot]
 bot = telebot.TeleBot(TOKEN)
 
