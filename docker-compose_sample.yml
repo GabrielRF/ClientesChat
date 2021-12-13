@@ -1,8 +1,7 @@
 version: '3.9'
 services:
   clienteschat:
-    # build: .
-    image: clienteschat
+    image: gabrielrf/clienteschat
     environment:
       TOKEN:
       SAC_CHANNEL:
