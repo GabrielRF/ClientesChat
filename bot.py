@@ -9,15 +9,14 @@ TOKEN = os.getenv('TOKEN')
 sac_channel = os.getenv('SAC_CHANNEL')
 sac_group = os.getenv('SAC_GROUP')
 sac_bot = os.getenv('BOT_USERNAME')
-MONGO_SERVER = os.getenv('MONGO_SERVER')
-MONGO_PORT = os.getenv('MONGO_PORT')
+MONGO_CON = os.getenv('MONGO_CON')
 LOG_DAYS = os.getenv('LOG_DAYS')
 START_MSG = os.getenv('START_MSG')
 RESTART_MSG = os.getenv('RESTART_MSG')
 END_MSG = os.getenv('END_MSG')
 NOTIFY_ADMINS = os.getenv('NOTIFY_ADMINS')
 
-client = MongoClient(f"{MONGO_SERVER}:{MONGO_PORT}/")
+client = MongoClient(f"{MONGO_CON}")
 db = client[sac_bot]
 bot = telebot.TeleBot(TOKEN)
 
