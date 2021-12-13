@@ -2,8 +2,11 @@
 
 * [Sobre o serviço](#sobre-o-serviço)
 * [Configuração](#configuração)
+  * [Banco de Dados](#banco-de-dados)
+  * [Variáveis de Ambiente](#variáveis-de-ambiente)
   * [Docker](#docker)
   * [Python](#python)
+  * [Heroku](#heroku)
 * [Contribuição](#contribuição)
 
 ## Sobre o serviço
@@ -14,11 +17,19 @@ Para mais informações e ajuda, [visite o site](https://clientes.chat).
 
 ## Configuração
 
-### Docker
+### Banco de Dados
 
-Clone o repositório, renomeie o arquivo `docker-compose_sample.yml` para `docker-compose.yml` e ajuste as variáveis.
+O bot exige um banco de dados MongoDB em funcionamento.
 
-#### Variáveis de ambiente
+#### Container com banco de dados local
+
+O arquivo `docker_compose_local_mongodb.yml` mostra como seria o deploy de um conteiner com o bot e outro com o banco de dados, já com a comunicação entre eles funcionando corretamente. 
+
+#### Container com baco de dados remoto
+
+Para este caso, utilize o arquivo `docker_compose_remote_mongodb.yml`.
+
+### Variáveis de ambiente
 
 `TOKEN`: Token do bot gerado no [@BotFather](https://t.me/BotFather);
 
@@ -40,18 +51,11 @@ Clone o repositório, renomeie o arquivo `docker-compose_sample.yml` para `docke
 
 `END_MSG`: Mensagem enviada quando um atendimento é finalizado. Utilize `<br>` para quebras de linhas.
 
-#### Deploy
+### Docker
 
-`docker-compose up -d` para rodar o bot e o banco de dados.
+Escolhido o arquivo ideal para seu banco de dados e feitas as configurações das [variáveis de ambiente](#variáveis-de-ambiente), renomeie o arquivo para `docker-compose.yml` execute o comando:
 
-#### Volume
-
-Para definir um volume, acrescente ao `mongodb`:
-
-```
-volumes:
-  - PASTA_NO_HOST:/data/db
-```
+`docker-compose up -d`
 
 ### Python
 
@@ -69,6 +73,14 @@ Execute o bot:
 
 ```
 python bot.py
+```
+
+### Heroku
+
+O bot está pronto para funcionar também em modo *webhook*, facilitando que seja executado no site [Heroku](https://heroku.com). Para isto, defina as mesmas [variáveis de ambiente](#variáveis-de-ambiente) explicadas anteriormente e acrescente a variável:
+
+```
+WEBHOOK = https://SEU_APP.herokuapp.com/
 ```
 
 ## Contribuição
