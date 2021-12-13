@@ -418,4 +418,6 @@ def webhook():
 if not WEBHOOK:
     bot.polling(allowed_updates=telebot.util.update_types)
 else:
+    bot.remove_webhook()
+    bot.set_webhook(url=config[WEBHOOK])
     server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
