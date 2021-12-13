@@ -15,10 +15,12 @@ START_MSG = os.getenv('START_MSG')
 RESTART_MSG = os.getenv('RESTART_MSG')
 END_MSG = os.getenv('END_MSG')
 NOTIFY_ADMINS = os.getenv('NOTIFY_ADMINS')
+WEBHOOK = os.getenv('WEBHOOK', False)
 
 client = MongoClient(f"{MONGO_CON}")
 db = client[sac_bot]
 bot = telebot.TeleBot(TOKEN)
+server = Flask(__name__)
 
 bot.set_my_commands([
     telebot.types.BotCommand("/start", "Novo atendimento"),
@@ -407,4 +409,13 @@ def query_text(query):
             query_result.append(types.InlineQueryResultArticle(i, answer['message'], types.InputTextMessageContent(answer['message'], parse_mode='Markdown', disable_web_page_preview=True)))
         bot.answer_inline_query(query.id, query_result, cache_time=120)
 
-bot.polling(allowed_updates=telebot.util.update_types)
+@server.route("/")
+def webhook():
+    bot.remove_webhook()
+    bot.set_webhook(url=WEBHOOK + TOKEN)
+    return "!", 200
+
+if not WEBHOOK:
+    bot.polling(allowed_updates=telebot.util.update_types)
+else:
+    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
