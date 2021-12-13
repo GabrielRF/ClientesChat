@@ -410,15 +410,16 @@ def query_text(query):
             query_result.append(types.InlineQueryResultArticle(i, answer['message'], types.InputTextMessageContent(answer['message'], parse_mode='Markdown', disable_web_page_preview=True)))
         bot.answer_inline_query(query.id, query_result, cache_time=120)
 
-@server.route("/")
-def webhook():
-    bot.remove_webhook()
-    bot.set_webhook(url=WEBHOOK + TOKEN)
+@server.route('/' + TOKEN, methods=['POST'])
+def getMessage():
+    json_string = request.get_data().decode('utf-8')
+    update = telebot.types.Update.de_json(json_string)
+    bot.process_new_updates([update])
     return "!", 200
 
 if not WEBHOOK:
     bot.polling(allowed_updates=telebot.util.update_types)
 else:
     bot.remove_webhook()
-    bot.set_webhook(url=config[WEBHOOK])
+    bot.set_webhook(url=WEBHOOK + TOKEN)
     server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
