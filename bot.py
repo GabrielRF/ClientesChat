@@ -417,9 +417,10 @@ def getMessage():
     bot.process_new_updates([update])
     return "!", 200
 
-if not WEBHOOK:
-    bot.polling(allowed_updates=telebot.util.update_types)
-else:
+if __name__ == "__main__":
     bot.remove_webhook()
-    bot.set_webhook(url=WEBHOOK + TOKEN)
-    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+    if not WEBHOOK:
+        bot.polling(allowed_updates=telebot.util.update_types)
+    else:
+        bot.set_webhook(url=WEBHOOK + TOKEN)
+        server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
