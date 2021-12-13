@@ -1,0 +1,20 @@
+version: '3.9'
+services:
+  clienteschat:
+    image: gabrielrf/clienteschat
+    environment:
+      TOKEN:
+      SAC_CHANNEL:
+      SAC_GROUP:
+      BOT_USERNAME:
+      MONGO_CON: mongodb+srv://USUARIO:SENHA@SERVIDOR
+      LOG_DAYS: 14
+      NOTIFY_ADMINS: 1
+      START_MSG:
+      RESTART_MSG:
+      END_MSG:
+    restart: always
+    depends_on:
+      - mongodb
+    deploy:
+      replicas: 1

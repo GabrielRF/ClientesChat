@@ -1,0 +1,37 @@
+version: '3.9'
+services:
+  clienteschat:
+    image: gabrielrf/clienteschat
+    environment:
+      TOKEN:
+      SAC_CHANNEL:
+      SAC_GROUP:
+      BOT_USERNAME:
+      MONGO_CON: mongodb://mongodb
+      LOG_DAYS: 14
+      NOTIFY_ADMINS: 1
+      START_MSG:
+      RESTART_MSG:
+      END_MSG:
+    restart: always
+    depends_on:
+      - mongodb
+    deploy:
+      replicas: 1
+    networks:
+      - clienteschat
+
+  mongodb:
+    image: mongo
+    restart: always
+    environment:
+      - AUTH=no
+    command:
+      "mongod --oplogSize 128 --quiet"
+    networks:
+      - clienteschat
+    volumes:
+      - /mnt/clienteschat:/data/db
+
+networks:
+  clienteschat:
