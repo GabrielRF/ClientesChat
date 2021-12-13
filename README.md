@@ -28,9 +28,7 @@ Clone o repositório, renomeie o arquivo `docker-compose_sample.yml` para `docke
 
 `BOT_USERNAME`: Nome de usuário do bot que será exibido na mensagem inline;
 
-`MONGO_SERVER`: Servidor de banco de dados;
-
-`MONGO_PORT`: Porta de conexão ao banco de dados;
+`MONGO_CON`: String de conexão ao banco de dados;
 
 `LOG_DAYS`: Tempo de retenção do histórico das mensagens no banco. Útil para que as respostas à mensagens funcionem adequadamente;
 
