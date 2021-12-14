@@ -1,0 +1,7 @@
+{
+    "name": "Clientes.Chat",
+    "description": "Atendimento a clientes via Telegram",
+    "repository": "https://github.com/GabrielRF/ClientesChat",
+    "logo": "https://clientes.chat/images/ClientesChatBot.png",
+    "keywords": ["telegram", "telegram-bot", "python"]
+}
