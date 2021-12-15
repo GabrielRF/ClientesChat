@@ -1,5 +1,3 @@
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-
 # [Clientes.Chat](https://clientes.chat)
 
 * [Sobre o serviço](#sobre-o-serviço)
@@ -55,6 +53,8 @@ Para este caso, utilize o arquivo `docker_compose_remote_mongodb.yml`.
 
 ### Docker
 
+![Docker Pulls](https://img.shields.io/docker/pulls/gabrielrf/clienteschat)
+
 Escolhido o arquivo ideal para seu banco de dados e feitas as configurações das [variáveis de ambiente](#variáveis-de-ambiente), renomeie o arquivo para `docker-compose.yml` execute o comando:
 
 `docker-compose up -d`
@@ -78,6 +78,8 @@ python bot.py
 ```
 
 ### Heroku
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 O bot está pronto para funcionar também em modo *webhook*, facilitando que seja executado no site [Heroku](https://heroku.com). Para isto, defina as mesmas [variáveis de ambiente](#variáveis-de-ambiente) explicadas anteriormente e acrescente a variável:
 
