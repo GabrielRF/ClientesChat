@@ -356,6 +356,8 @@ def on_message(message):
         add_message(message.from_user.id, message.message_id, msg.message_id, message)
     if message.from_user.id > 777000 and is_team_member(message.from_user.id):
         try:
+            if '#' == message.text[0]:
+                return
             if search_thread(message.reply_to_message.message_id):
                 reply_id = search_thread(message.reply_to_message.message_id)
                 msg = bot.copy_message(reply_id['user_id'], message.chat.id, message.message_id, reply_to_message_id=reply_id)
