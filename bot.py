@@ -268,6 +268,9 @@ def cmd_start(message):
             add_user_thread(message.from_user.id, msg.message_id)
             user = search_user(message.from_user.id)
         bot.reply_to(message, START_MSG.format(message.from_user.first_name).replace('<br>', '\n'), parse_mode='HTML')
+        if ' ' in message.text:
+            start_param = message.text.replace('/start ', '')
+            bot.send_message(sac_channel, msgs.from_source.format(start_param, reply_to_message_id=user['thread_id'], parse_mode='HTML')
     else:
         bot.send_message(message.from_user.id, msgs.start_operator, parse_mode='HTML')
 

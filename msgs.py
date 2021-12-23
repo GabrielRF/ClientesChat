@@ -40,3 +40,4 @@ quick_answer_error = ('⚙️ Resposta pronta não localizada. Operação cancel
 inline_user_header = ('➡️ Clique aqui para receber atendimento ⬅️')
 inline_user_link = ('☎️ Receba atendimento agora\n@{}')
 pinned_msg = ('<a href="{}"><b>Nova mensagem</b>\n{}.</a>')
+from_source = ('⚙️ Origem: <code>{}</code>')
