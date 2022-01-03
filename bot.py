@@ -32,6 +32,7 @@ bot.set_my_commands([
 bot.set_my_commands([
     telebot.types.BotCommand("/p", "Definir proridade"),
     telebot.types.BotCommand("/fim", "Encerrar um atendimento"),
+    telebot.types.BotCommand("/fs", "Encerrar silenciosamente um atendimento"),
     telebot.types.BotCommand("/ajuda", "Ajuda"),
     telebot.types.BotCommand("/resposta", "Definir uma resposta pronta"),
     telebot.types.BotCommand("/remover", "Remover uma resposta pronta"),
@@ -213,6 +214,24 @@ def unpin(message):
         pass
     bot.delete_message(message.chat.id, message.message_id)
 
+@bot.message_handler(commands=['fs'])
+def quiet_unpin(message):
+    bot.send_chat_action(message.chat.id, 'typing')
+    if not is_team_member(message.from_user.id):
+        return
+    bot.unpin_chat_message(sac_channel, message.json['reply_to_message']['forward_from_message_id'])
+    try:
+        user_id = search_thread(message.reply_to_message.message_id)['user_id']
+        update_user_info(user_id, 'priority', 0)
+        try:
+            update_thread(user_id)
+        except:
+            pass
+        bot.send_message(sac_group, msgs.end_operator.format(message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+    except:
+        pass
+    bot.delete_message(message.chat.id, message.message_id)
+
 @bot.message_handler(commands=['ban'])
 def ban(message):
     bot.send_chat_action(message.chat.id, 'typing')
@@ -244,6 +263,7 @@ def set_priority(message):
                     try:
                         update_user_info(user['user_id'], 'priority', int(priority))
                         msg = update_thread(user['user_id'])
+                        bot.send_message(sac_group, msgs.changed_priority, parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
                     except:
                         pass
                     bot.delete_message(message.chat.id, message.message_id)

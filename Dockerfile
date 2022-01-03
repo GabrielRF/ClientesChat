@@ -1,5 +1,6 @@
 FROM python:3.8-alpine
 
+RUN pip install flask
 RUN pip install pytelegrambotapi
 RUN pip install pymongo
 RUN pip install pymongo[tls]

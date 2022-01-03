@@ -13,6 +13,7 @@ priorities = (
     )
 set_priority = ('⚙️ Envie <code>/p valor</code> para definir o valor da prioridade.'
     + priorities)
+changed_priority = ('⚙️ Prioridade alterada.')
 end_operator = ('⚙️ Atendimento encerrado por <a href="tg://user?id={0}">{0} {1} {2}</a>.')
 ban_operator = ('⚙️ Usuário banido por <a href="tg://user?id={0}">{0} {1} {2}</a>.')
 topic_format = (
