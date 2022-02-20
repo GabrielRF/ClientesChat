@@ -208,7 +208,7 @@ def unpin(message):
             update_thread(user_id)
         except:
             pass
-        bot.send_message(sac_group, msgs.end_operator.format(message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+        bot.send_message(sac_group, msgs.end_operator.format(message.from_user.id, message.from_user.first_name, message.from_user.last_name, END_MSG.replace('<br>', '\n')), parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
         bot.send_message(user_id, END_MSG.replace('<br>', '\n'), parse_mode='HTML')
     except:
         pass
@@ -227,7 +227,7 @@ def quiet_unpin(message):
             update_thread(user_id)
         except:
             pass
-        bot.send_message(sac_group, msgs.end_operator.format(message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
+        bot.send_message(sac_group, msgs.silenced_end_operator.format(message.from_user.id, message.from_user.first_name, message.from_user.last_name), parse_mode='HTML', reply_to_message_id=message.reply_to_message.message_id)
     except:
         pass
     bot.delete_message(message.chat.id, message.message_id)
