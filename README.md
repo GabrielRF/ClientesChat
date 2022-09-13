@@ -79,25 +79,20 @@ python bot.py
 
 ### AWS Lambda
 
-O bot está pronto para funcionar também em modo *webhook*, facilitando que seja executado em uma função AWS Lambda. Para isto, defina as mesmas [variáveis de ambiente](#variáveis-de-ambiente) explicadas anteriormente e acrescente a variável:
+Para mais informações, visite: [https://www.serverless.com/framework/docs/getting-started](https://www.serverless.com/framework/docs/getting-started)
 
-```
-WEBHOOK = https://SEU_APP.amazonaws.com/
-```
-
-Caso prefira, altere o arquivo `serverless_sample.yml` conforme a necessidade. Renomeie para `serverles.yml` e execute:
+O bot está pronto para funcionar também em modo *webhook*, facilitando que seja executado em uma função AWS Lambda. Para isto, edite o arquivo `serverless_sample.yml` seguindo as [variáveis de ambiente](#variáveis-de-ambiente) explicadas anteriormente. Renomeie o arquivo para `serverless.yml` e execute:
 
 ```
 serverless deploy
 ```
 
-Isto irá criar a função e tudo mais o que for necessário para o funcionamento do serviço. Feito isto, é necessário definir o webhook para que o bot funcione.
+Isto irá criar a função e demais componentes necessários para o funcionamento do serviço. Copie a URL exibida no passo anterior, salve-a no arquivo `serverless.yml` e também como uma variável de ambiente local executando:
 
 ```
+export WEBHOOK=https://SEU_APP.amazonaws.com/
 python3 set_webhook.py
 ```
-
-Para mais informações, visite: [https://www.serverless.com/framework/docs/getting-started](https://www.serverless.com/framework/docs/getting-started)
 
 ## Contribuição
 
