@@ -6,7 +6,7 @@
   * [Variáveis de Ambiente](#variáveis-de-ambiente)
   * [Docker](#docker)
   * [Python](#python)
-  * [Heroku](#heroku)
+  * [AWS Lambda](#aws-lambda)
 * [Contribuição](#contribuição)
 
 ## Sobre o serviço
@@ -77,15 +77,27 @@ Execute o bot:
 python bot.py
 ```
 
-### Heroku
+### AWS Lambda
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-
-O bot está pronto para funcionar também em modo *webhook*, facilitando que seja executado no site [Heroku](https://heroku.com). Para isto, defina as mesmas [variáveis de ambiente](#variáveis-de-ambiente) explicadas anteriormente e acrescente a variável:
+O bot está pronto para funcionar também em modo *webhook*, facilitando que seja executado em uma função AWS Lambda. Para isto, defina as mesmas [variáveis de ambiente](#variáveis-de-ambiente) explicadas anteriormente e acrescente a variável:
 
 ```
-WEBHOOK = https://SEU_APP.herokuapp.com/
+WEBHOOK = https://SEU_APP.amazonaws.com/
 ```
+
+Caso prefira, altere o arquivo `serverless_sample.yml` conforme a necessidade. Renomeie para `serverles.yml` e execute:
+
+```
+serverless deploy
+```
+
+Isto irá criar a função e tudo mais o que for necessário para o funcionamento do serviço. Feito isto, é necessário definir o webhook para que o bot funcione.
+
+```
+python3 set_webhook.py
+```
+
+Para mais informações, visite: [https://www.serverless.com/framework/docs/getting-started](https://www.serverless.com/framework/docs/getting-started)
 
 ## Contribuição
 

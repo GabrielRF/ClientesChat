@@ -21,7 +21,13 @@ WEBHOOK = os.getenv('WEBHOOK', False)
 
 client = MongoClient(f"{MONGO_CON}")
 db = client[sac_bot]
-bot = telebot.TeleBot(TOKEN, threaded=False)
+
+if WEBHOOK:
+    threaded=False
+else:
+    threaded=True
+
+bot = telebot.TeleBot(TOKEN, threaded=threaded)
 
 bot.set_my_commands([
     telebot.types.BotCommand("/start", "Novo atendimento"),
