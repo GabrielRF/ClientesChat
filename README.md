@@ -84,6 +84,7 @@ Para mais informações, visite: [https://www.serverless.com/framework/docs/gett
 O bot está pronto para funcionar também em modo *webhook*, facilitando que seja executado em uma função AWS Lambda. Para isto, edite o arquivo `serverless_sample.yml` seguindo as [variáveis de ambiente](#variáveis-de-ambiente) explicadas anteriormente. Renomeie o arquivo para `serverless.yml` e execute:
 
 ```
+export TOKEN=12345678:AAAAAAAAAAAAAAAAAAAAABBBBBBBCCCC
 serverless deploy
 ```
 

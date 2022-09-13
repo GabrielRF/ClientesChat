@@ -13,12 +13,12 @@ functions:
          path: /
          method: post
     environment:
-      TOKEN:
-      WEBHOOK:
       SAC_CHANNEL:
       SAC_GROUP:
       MONGO_CON:
       BOT_USERNAME:
+      TOKEN: ${env:TOKEN}
+      WEBHOOK: ${env:WEBHOOK}
       END_MSG: 🔲 <b>Atendimento encerrado.</b><br>Envie /start para começar um novo atendimento.
       LOG_DAYS: 14
       NOTIFY_ADMINS: 1
