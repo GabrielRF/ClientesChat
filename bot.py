@@ -440,3 +440,7 @@ def hello_http(event, context):
     bot.process_new_updates([update])
     return {"statusCode": 200, "body": "hello world"}
 
+if __name__ == "__main__":
+    bot.remove_webhook()
+    if not WEBHOOK:
+        bot.polling(allowed_updates=telebot.util.update_types)
