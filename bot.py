@@ -22,12 +22,7 @@ WEBHOOK = os.getenv('WEBHOOK', False)
 client = MongoClient(f"{MONGO_CON}")
 db = client[sac_bot]
 
-if WEBHOOK:
-    threaded=False
-else:
-    threaded=True
-
-bot = telebot.TeleBot(TOKEN, threaded=threaded)
+bot = telebot.TeleBot(TOKEN, threaded=False)
 
 bot.set_my_commands([
     telebot.types.BotCommand("/start", "Novo atendimento"),
@@ -414,12 +409,18 @@ def on_edit(message):
         return
     if not is_team_member(message.from_user.id):
         data = search_message('private_id', message.json['message_id'])
-        bot.edit_message_text(message.text, sac_group, data['group_id'])
-        add_message(message.from_user.id, data['private_id'], 'edit', message)
+        try:
+            bot.edit_message_text(message.text, sac_group, data['group_id'])
+            add_message(message.from_user.id, data['private_id'], 'edit', message)
+        except:
+            pass
     else:
         chat_id = search_message('group_id', message.message_id)
-        bot.edit_message_text(message.text, chat_id['user_id'], chat_id['private_id'])
-        add_message(chat_id['user_id'], chat_id['private_id'], 'edit', message)
+        try:
+            bot.edit_message_text(message.text, chat_id['user_id'], chat_id['private_id'])
+            add_message(chat_id['user_id'], chat_id['private_id'], 'edit', message)
+        except:
+            pass
 
 @bot.chat_member_handler(func=lambda m:True)
 def on_chat_action(message):
@@ -448,5 +449,3 @@ def hello_http(event, context):
 
 if __name__ == "__main__":
     bot.remove_webhook()
-    if not WEBHOOK:
-        bot.polling(allowed_updates=telebot.util.update_types)
