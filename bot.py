@@ -444,7 +444,10 @@ def query_text(query):
 
 def hello_http(event, context):
     update = telebot.types.Update.de_json(event['body'])
-    bot.process_new_updates([update])
+    try:
+        bot.process_new_updates([update])
+    except:
+        pass
     return {"statusCode": 200, "body": "hello world"}
 
 if __name__ == "__main__":
