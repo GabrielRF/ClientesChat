@@ -6,7 +6,7 @@
   * [Variáveis de Ambiente](#variáveis-de-ambiente)
   * [Docker](#docker)
   * [Python](#python)
-  * [Heroku](#heroku)
+  * [AWS Lambda](#aws-lambda)
 * [Contribuição](#contribuição)
 
 ## Sobre o serviço
@@ -49,7 +49,9 @@ Para este caso, utilize o arquivo `docker_compose_remote_mongodb.yml`.
 
 `RESTART_MSG`: Mensagem de resposta quando um atendimento é reaberto. Utilize `<br>` para quebras de linhas;
 
-`END_MSG`: Mensagem enviada quando um atendimento é finalizado. Utilize `<br>` para quebras de linhas.
+`END_MSG`: Mensagem enviada quando um atendimento é finalizado. Utilize `<br>` para quebras de linhas;
+
+WEBHOOK`: Caso a variável seja definida, o bot irá funcionar com webhook. Caso contrário, com polling.
 
 ### Docker
 
@@ -77,14 +79,25 @@ Execute o bot:
 python bot.py
 ```
 
-### Heroku
+### AWS Lambda
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+> Para mais informações, visite: [serverless.com](https://www.serverless.com/framework/docs/getting-started)
 
-O bot está pronto para funcionar também em modo *webhook*, facilitando que seja executado no site [Heroku](https://heroku.com). Para isto, defina as mesmas [variáveis de ambiente](#variáveis-de-ambiente) explicadas anteriormente e acrescente a variável:
+O bot está pronto para funcionar com *webhook* em uma função AWS Lambda.
+
+Edite o arquivo `serverless_sample.yml` seguindo as [variáveis de ambiente](#variáveis-de-ambiente) explicadas anteriormente. Renomeie o arquivo para `serverless.yml` e execute:
 
 ```
-WEBHOOK = https://SEU_APP.herokuapp.com/
+export TOKEN=12345678:AAAAAAAAAAAAAAAAAAAAABBBBBBBCCCC
+serverless deploy
+```
+
+Isto irá criar a função e demais componentes necessários para o funcionamento do serviço. Copie a URL exibida no fim da execução e a defina como uma variável de ambiente. Execute:
+
+```
+export WEBHOOK=https://SEU_APP.amazonaws.com/
+python3 set_webhook.py
+serverless deploy
 ```
 
 ## Contribuição

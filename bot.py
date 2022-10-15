@@ -1,8 +1,9 @@
 import datetime
+import json
 import telebot
+import time
 import msgs
 import os
-from flask import Flask, request
 from telebot import types, util
 from pymongo import ASCENDING, MongoClient
 
@@ -20,8 +21,11 @@ WEBHOOK = os.getenv('WEBHOOK', False)
 
 client = MongoClient(f"{MONGO_CON}")
 db = client[sac_bot]
-bot = telebot.TeleBot(TOKEN)
-server = Flask(__name__)
+
+if WEBHOOK:
+    bot = telebot.TeleBot(TOKEN, threaded=False)
+else:
+    bot = telebot.TeleBot(TOKEN)
 
 bot.set_my_commands([
     telebot.types.BotCommand("/start", "Novo atendimento"),
@@ -408,12 +412,18 @@ def on_edit(message):
         return
     if not is_team_member(message.from_user.id):
         data = search_message('private_id', message.json['message_id'])
-        bot.edit_message_text(message.text, sac_group, data['group_id'])
-        add_message(message.from_user.id, data['private_id'], 'edit', message)
+        try:
+            bot.edit_message_text(message.text, sac_group, data['group_id'])
+            add_message(message.from_user.id, data['private_id'], 'edit', message)
+        except:
+            pass
     else:
         chat_id = search_message('group_id', message.message_id)
-        bot.edit_message_text(message.text, chat_id['user_id'], chat_id['private_id'])
-        add_message(chat_id['user_id'], chat_id['private_id'], 'edit', message)
+        try:
+            bot.edit_message_text(message.text, chat_id['user_id'], chat_id['private_id'])
+            add_message(chat_id['user_id'], chat_id['private_id'], 'edit', message)
+        except:
+            pass
 
 @bot.chat_member_handler(func=lambda m:True)
 def on_chat_action(message):
@@ -435,17 +445,16 @@ def query_text(query):
             query_result.append(types.InlineQueryResultArticle(i, answer['message'], types.InputTextMessageContent(answer['message'], parse_mode='Markdown', disable_web_page_preview=True)))
         bot.answer_inline_query(query.id, query_result, cache_time=120)
 
-@server.route('/' + TOKEN, methods=['POST'])
-def getMessage():
-    json_string = request.get_data().decode('utf-8')
-    update = telebot.types.Update.de_json(json_string)
-    bot.process_new_updates([update])
-    return "!", 200
+if not WEBHOOK:
+    bot.polling()
+
+def hello_http(event, context):
+    update = telebot.types.Update.de_json(event['body'])
+    try:
+        bot.process_new_updates([update])
+    except:
+        pass
+    return {"statusCode": 200, "body": "hello world"}
 
 if __name__ == "__main__":
     bot.remove_webhook()
-    if not WEBHOOK:
-        bot.polling(allowed_updates=telebot.util.update_types)
-    else:
-        bot.set_webhook(url=WEBHOOK + TOKEN)
-        server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
