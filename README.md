@@ -49,7 +49,9 @@ Para este caso, utilize o arquivo `docker_compose_remote_mongodb.yml`.
 
 `RESTART_MSG`: Mensagem de resposta quando um atendimento é reaberto. Utilize `<br>` para quebras de linhas;
 
-`END_MSG`: Mensagem enviada quando um atendimento é finalizado. Utilize `<br>` para quebras de linhas.
+`END_MSG`: Mensagem enviada quando um atendimento é finalizado. Utilize `<br>` para quebras de linhas;
+
+WEBHOOK`: Caso a variável seja definida, o bot irá funcionar com webhook. Caso contrário, com polling.
 
 ### Docker
 
