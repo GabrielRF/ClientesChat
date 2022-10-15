@@ -1,8 +1,8 @@
 import telebot
-import os
+import sys
 
-TOKEN = os.getenv('TOKEN')
-WEBHOOK = os.getenv('WEBHOOK')
+TOKEN = sys.argv[1]
+WEBHOOK = sys.argv[2]
 
 bot = telebot.TeleBot(TOKEN)
 

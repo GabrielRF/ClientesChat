@@ -24,6 +24,7 @@ functions:
       NOTIFY_ADMINS: 1
       RESTART_MSG: Mensagem enviada. ✅<br>Te responderemos em breve.
       START_MSG: Olá, <b>{0}</b>!<br>Por favor, envie seu relato de forma objetiva e resumida.<br>Se necessário, inclua prints de tela.<br>Te responderemos em breve. ✅<br><br><a href="https://clientes.chat">Quer um bot igual a este? Clique aqui!</a>
+      WEBHOOK: True
 
 plugins:
   - serverless-python-requirements

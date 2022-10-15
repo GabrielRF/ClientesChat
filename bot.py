@@ -22,7 +22,10 @@ WEBHOOK = os.getenv('WEBHOOK', False)
 client = MongoClient(f"{MONGO_CON}")
 db = client[sac_bot]
 
-bot = telebot.TeleBot(TOKEN, threaded=False)
+if WEBHOOK:
+    bot = telebot.TeleBot(TOKEN, threaded=False)
+else:
+    bot = telebot.TeleBot(TOKEN)
 
 bot.set_my_commands([
     telebot.types.BotCommand("/start", "Novo atendimento"),
@@ -441,6 +444,9 @@ def query_text(query):
         for i, answer in enumerate(answers[:25]):
             query_result.append(types.InlineQueryResultArticle(i, answer['message'], types.InputTextMessageContent(answer['message'], parse_mode='Markdown', disable_web_page_preview=True)))
         bot.answer_inline_query(query.id, query_result, cache_time=120)
+
+if not WEBHOOK:
+    bot.polling()
 
 def hello_http(event, context):
     update = telebot.types.Update.de_json(event['body'])
