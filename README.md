@@ -89,14 +89,14 @@ Edite o arquivo `serverless_sample.yml` seguindo as [variáveis de ambiente](#va
 
 ```
 export TOKEN=12345678:AAAAAAAAAAAAAAAAAAAAABBBBBBBCCCC
+export WEBHOOK=True
 serverless deploy
 ```
 
 Isto irá criar a função e demais componentes necessários para o funcionamento do serviço. Copie a URL exibida no fim da execução e a defina como uma variável de ambiente. Execute:
 
 ```
-export WEBHOOK=https://SEU_APP.amazonaws.com/
-python3 set_webhook.py
+python3 set_webhook.py <TOKEN> <URL_DA_FUNCAO>
 serverless deploy
 ```
 
